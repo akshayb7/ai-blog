@@ -1,0 +1,1 @@
+export default function FeaturedPost({ post }) { return <div className="mb-20"><h2 className="text-2xl font-bold mb-6">Featured</h2><div className="glass-card rounded-3xl p-8"><h3 className="text-2xl font-bold">{post.title}</h3></div></div>; }
