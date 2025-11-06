@@ -40,7 +40,7 @@ export default async function PostPage({ params }) {
   const { frontmatter, content } = getPostBySlug(slug);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
       <ReadingProgress />
       <Navigation />
       <TableOfContents />
@@ -50,7 +50,7 @@ export default async function PostPage({ params }) {
           {/* Back Button */}
           <Link 
             href="/"
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+            className="inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-8 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
@@ -71,23 +71,23 @@ export default async function PostPage({ params }) {
           <header className="mb-12">
             {/* Category Badge */}
             <div className="mb-4">
-              <span className="glass-card px-4 py-1.5 rounded-full text-sm font-medium text-gray-700 border border-white/20">
+              <span className="glass-card px-4 py-1.5 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 border border-white/20">
                 {frontmatter.category}
               </span>
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
               {frontmatter.title}
             </h1>
 
             {/* Description */}
-            <p className="text-xl text-gray-600 mb-6 leading-relaxed">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
               {frontmatter.description}
             </p>
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
               {frontmatter.author && (
                 <div className="flex items-center space-x-2">
                   <User className="w-4 h-4" />
@@ -118,7 +118,7 @@ export default async function PostPage({ params }) {
                 {frontmatter.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 text-xs font-medium text-gray-600 bg-white/50 rounded-full border border-gray-200"
+                    className="px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-white/50 dark:bg-slate-800/50 rounded-full border border-gray-200 dark:border-slate-700"
                   >
                     #{tag}
                   </span>
@@ -129,21 +129,23 @@ export default async function PostPage({ params }) {
 
           {/* Post Content */}
           <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/20">
-            <div className="prose prose-lg prose-gray max-w-none
-              prose-headings:font-bold prose-headings:text-gray-900
-              prose-h1:text-4xl prose-h1:mb-6
-              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
-              prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
-              prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-gray-900 prose-strong:font-semibold
-              prose-code:text-pink-600 prose-code:bg-pink-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:p-6
-              prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6
-              prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6
-              prose-li:text-gray-700 prose-li:my-2
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-600
+            <div className="prose prose-lg prose-gray dark:prose-invert max-w-none
+              prose-headings:font-bold 
+              prose-h1:text-4xl prose-h1:mb-6 prose-h1:text-gray-900 dark:prose-h1:text-gray-100
+              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:text-gray-900 dark:prose-h2:text-gray-100
+              prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-gray-900 dark:prose-h3:text-gray-100
+              prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
+              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-semibold
+              prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-pink-50 dark:prose-code:bg-pink-950/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+              prose-pre:bg-slate-900 dark:prose-pre:bg-slate-950 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:p-6 prose-pre:border prose-pre:border-slate-700
+              prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-ul:text-gray-700 dark:prose-ul:text-gray-300
+              prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6 prose-ol:text-gray-700 dark:prose-ol:text-gray-300
+              prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-li:my-2
+              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400 prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-950/30 prose-blockquote:py-2
               prose-img:rounded-xl prose-img:shadow-lg
+              prose-hr:border-gray-200 dark:prose-hr:border-gray-700
+              prose-table:text-gray-700 dark:prose-table:text-gray-300
             ">
               <MDXRemote 
                 source={content}

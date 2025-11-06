@@ -23,7 +23,7 @@ export default function Navigation() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Compass className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
               Expedition Logs
             </span>
           </Link>
@@ -34,13 +34,13 @@ export default function Navigation() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 font-medium transition-colors"
               >
                 {link.name}
               </Link>
             ))}
-            <button className="p-2 hover:bg-white/50 rounded-lg transition-colors">
-              <Search className="w-5 h-5 text-gray-600" />
+            <button className="p-2 hover:bg-white/50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
+              <Search className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
           </div>
 

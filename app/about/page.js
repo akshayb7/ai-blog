@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -20,57 +20,62 @@ export default function AboutPage() {
             <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
               <Compass className="w-12 h-12 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               About Akshay's Expedition Logs
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Documenting the journey through artificial intelligence, one expedition at a time
             </p>
           </div>
 
           {/* Main Content */}
           <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/20 mb-8">
-            <div className="prose prose-lg max-w-none">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome! 👋</h2>
+            <div className="prose prose-lg max-w-none 
+              prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+              prose-p:text-gray-700 dark:prose-p:text-gray-300
+              prose-strong:text-gray-900 dark:prose-strong:text-gray-100
+              prose-li:text-gray-700 dark:prose-li:text-gray-300
+              prose-em:text-gray-700 dark:prose-em:text-gray-300">
+              <h2 className="text-3xl font-bold mb-4">Welcome! 👋</h2>
               
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="leading-relaxed mb-6">
                 I'm Akshay, a machine learning engineer and AI enthusiast passionate about making complex concepts accessible. 
                 These expedition logs are my space to document practical insights, tutorials, and explorations in the world of artificial intelligence.
               </p>
 
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">What You'll Find Here</h3>
+              <h3 className="text-2xl font-bold mt-8 mb-4">What You'll Find Here</h3>
               
-              <ul className="space-y-3 text-gray-700">
+              <ul className="space-y-3">
                 <li>
-                  <strong className="text-gray-900">Deep Learning Tutorials:</strong> From transformers to CNNs, breaking down architectures with visual explanations
+                  <strong className="font-semibold">Deep Learning Tutorials:</strong> From transformers to CNNs, breaking down architectures with visual explanations
                 </li>
                 <li>
-                  <strong className="text-gray-900">GenAI Explorations:</strong> Practical guides on LLMs, fine-tuning, and building AI applications
+                  <strong className="font-semibold">GenAI Explorations:</strong> Practical guides on LLMs, fine-tuning, and building AI applications
                 </li>
                 <li>
-                  <strong className="text-gray-900">ML Engineering:</strong> Best practices, tools, and techniques for production ML systems
+                  <strong className="font-semibold">ML Engineering:</strong> Best practices, tools, and techniques for production ML systems
                 </li>
                 <li>
-                  <strong className="text-gray-900">Data Science:</strong> Statistical methods, visualization, and analytical thinking
+                  <strong className="font-semibold">Data Science:</strong> Statistical methods, visualization, and analytical thinking
                 </li>
               </ul>
 
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">My Approach</h3>
+              <h3 className="text-2xl font-bold mt-8 mb-4">My Approach</h3>
               
-              <p className="text-gray-700 leading-relaxed mb-4">
+              <p className="leading-relaxed mb-4">
                 I believe the best way to learn is by <em>doing</em>. Every post includes:
               </p>
               
-              <ul className="space-y-2 text-gray-700">
+              <ul className="space-y-2">
                 <li>✅ Practical code examples you can run</li>
                 <li>✅ Visual explanations of complex concepts</li>
                 <li>✅ Real-world applications and use cases</li>
                 <li>✅ Links to further resources</li>
               </ul>
 
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Background</h3>
+              <h3 className="text-2xl font-bold mt-8 mb-4">Background</h3>
               
-              <p className="text-gray-700 leading-relaxed">
+              <p className="leading-relaxed">
                 With a background in computer science and years of experience in machine learning, 
                 I've worked on everything from computer vision systems to NLP applications. 
                 I'm constantly learning and excited to share that journey with you.
@@ -80,8 +85,8 @@ export default function AboutPage() {
 
           {/* Connect Section */}
           <div className="glass-card rounded-2xl p-8 md:p-12 text-center border border-white/20">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Let's Connect</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Let's Connect</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               Have questions, suggestions, or just want to chat about AI? Reach out!
             </p>
             

@@ -14,9 +14,9 @@ export default function Footer() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
                 <Compass className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Expedition Logs</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Expedition Logs</span>
             </div>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
               Exploring the frontiers of artificial intelligence through practical 
               implementations, visual explanations, and hands-on tutorials.
             </p>
@@ -24,25 +24,25 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">Explore</h3>
-            <ul className="space-y-2 text-gray-600">
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">Explore</h3>
+            <ul className="space-y-2 text-gray-600 dark:text-gray-400">
               <li>
-                <Link href="/posts" className="hover:text-gray-900 transition-colors">
+                <Link href="/posts" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   All Posts
                 </Link>
               </li>
               <li>
-                <Link href="/categories" className="hover:text-gray-900 transition-colors">
+                <Link href="/categories" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   Categories
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-gray-900 transition-colors">
+                <Link href="/about" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   About
                 </Link>
               </li>
               <li>
-                <Link href="/rss" className="hover:text-gray-900 transition-colors">
+                <Link href="/rss" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   RSS Feed
                 </Link>
               </li>
@@ -51,7 +51,7 @@ export default function Footer() {
 
           {/* Social */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">Connect</h3>
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">Connect</h3>
             <div className="flex space-x-3">
               <a
                 href="https://github.com"
@@ -88,7 +88,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-white/20 pt-8 text-center text-gray-600 text-sm">
+        <div className="border-t border-white/20 pt-8 text-center text-gray-600 dark:text-gray-400 text-sm">
           <p>© {currentYear} Akshay's Expedition Logs. Built with Next.js, MDX, and ❤️</p>
         </div>
       </div>

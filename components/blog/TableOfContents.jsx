@@ -89,12 +89,12 @@ export default function TableOfContents() {
         style={{ zIndex: 30 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
             On This Page
           </h3>
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             aria-label="Close"
           >
             ×
@@ -112,8 +112,8 @@ export default function TableOfContents() {
                   onClick={() => scrollToHeading(heading.id)}
                   className={`text-left text-sm w-full py-1 px-2 rounded transition-colors ${
                     activeId === heading.id
-                      ? 'text-blue-600 font-semibold bg-blue-50/50'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50/50'
+                      ? 'text-blue-600 dark:text-blue-400 font-semibold bg-blue-50/50 dark:bg-blue-950/30'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50/50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   {heading.text}
