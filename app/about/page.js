@@ -1,11 +1,11 @@
 import Navigation from '@/components/blog/Navigation';
 import Footer from '@/components/blog/Footer';
-import { Brain, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Compass, Github, Linkedin, Twitter, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'About | AI Lab',
-  description: 'Learn more about AI Lab and the author behind the posts',
+  title: 'About | Akshay\'s Expedition Logs',
+  description: 'Learn more about Akshay\'s Expedition Logs and the journey through AI and ML',
 };
 
 export default function AboutPage() {
@@ -18,13 +18,13 @@ export default function AboutPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-              <Brain className="w-12 h-12 text-white" />
+              <Compass className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              About AI Lab
+              About Akshay's Expedition Logs
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Exploring the frontiers of artificial intelligence through practical implementations and visual explanations
+              Documenting the journey through artificial intelligence, one expedition at a time
             </p>
           </div>
 
@@ -34,8 +34,8 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome! 👋</h2>
               
               <p className="text-gray-700 leading-relaxed mb-6">
-                I'm a machine learning engineer and AI enthusiast passionate about making complex concepts accessible. 
-                This blog is my space to share practical insights, tutorials, and explorations in the world of artificial intelligence.
+                I'm Akshay, a machine learning engineer and AI enthusiast passionate about making complex concepts accessible. 
+                These expedition logs are my space to document practical insights, tutorials, and explorations in the world of artificial intelligence.
               </p>
 
               <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">What You'll Find Here</h3>

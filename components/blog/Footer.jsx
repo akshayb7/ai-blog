@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Brain, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Compass, Github, Linkedin, Twitter, Mail } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,9 +12,9 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
+                <Compass className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">AI Lab</span>
+              <span className="text-xl font-bold text-gray-900">Expedition Logs</span>
             </div>
             <p className="text-gray-600 leading-relaxed">
               Exploring the frontiers of artificial intelligence through practical 
@@ -89,7 +89,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-white/20 pt-8 text-center text-gray-600 text-sm">
-          <p>© {currentYear} AI Lab. Built with Next.js, MDX, and ❤️</p>
+          <p>© {currentYear} Akshay's Expedition Logs. Built with Next.js, MDX, and ❤️</p>
         </div>
       </div>
     </footer>

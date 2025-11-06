@@ -25,7 +25,7 @@ export async function generateMetadata({ params }) {
   const { frontmatter } = getPostBySlug(slug);
   
   return {
-    title: `${frontmatter.title} | AI Lab`,
+    title: `${frontmatter.title} | Akshay\'s Expedition Logs`,
     description: frontmatter.description,
     openGraph: {
       title: frontmatter.title,

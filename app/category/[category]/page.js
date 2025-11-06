@@ -24,8 +24,8 @@ export async function generateMetadata({ params }) {
     .join(' ');
   
   return {
-    title: `${displayCategory} Posts | AI Lab`,
-    description: `Browse all ${displayCategory} posts`,
+    title: `${displayCategory} Posts | Akshay\'s Expedition Logs`,
+    description: `Browse all ${displayCategory} expedition logs`,
   };
 }
 

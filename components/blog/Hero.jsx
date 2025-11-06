@@ -16,7 +16,7 @@ export default function Hero() {
         {/* Main Heading */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 bg-clip-text text-transparent leading-tight">
-            Welcome to AI Lab
+            Akshay's Expedition Logs
           </h1>
           <p className="text-xl text-gray-600 leading-relaxed">
             Exploring Machine Learning, Deep Learning, and Generative AI through 

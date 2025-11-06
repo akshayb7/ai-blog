@@ -4,8 +4,8 @@ import Footer from '@/components/blog/Footer';
 import PostCard from '@/components/blog/PostCard';
 
 export const metadata = {
-  title: 'All Posts | AI Lab',
-  description: 'Browse all blog posts on Machine Learning, Deep Learning, and Generative AI',
+  title: 'All Posts | Akshay\'s Expedition Logs',
+  description: 'Browse all expedition logs on Machine Learning, Deep Learning, and Generative AI',
 };
 
 export default function AllPostsPage() {
