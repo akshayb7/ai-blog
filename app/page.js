@@ -4,16 +4,17 @@ import FeaturedPost from '@/components/blog/FeaturedPost';
 import RecentPosts from '@/components/blog/RecentPosts';
 import Newsletter from '@/components/blog/Newsletter';
 import Footer from '@/components/blog/Footer';
-import { getFeaturedPost, getRecentPosts } from '@/lib/posts';
+import { getFeaturedPost, getRecentPosts, getAllPosts } from '@/lib/posts';
 
 export default function Home() {
   // Load posts from MDX files
   const featuredPost = getFeaturedPost();
   const recentPosts = getRecentPosts(3);
+  const allPosts = getAllPosts(); // For search
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
-      <Navigation />
+      <Navigation posts={allPosts} />
       
       <main>
         <Hero />

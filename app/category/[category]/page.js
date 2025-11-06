@@ -39,10 +39,11 @@ export default async function CategoryPage({ params }) {
     .join(' ');
   
   const posts = getPostsByCategory(displayCategory);
+  const allPosts = getAllPosts(); // For search
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
-      <Navigation />
+      <Navigation posts={allPosts} />
 
       <main className="pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6">
