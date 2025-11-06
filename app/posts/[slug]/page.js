@@ -2,10 +2,13 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getPostBySlug, getAllPostSlugs } from '@/lib/posts';
 import Navigation from '@/components/blog/Navigation';
 import Footer from '@/components/blog/Footer';
+import ReadingProgress from '@/components/blog/ReadingProgress';
+import TableOfContents from '@/components/blog/TableOfContents';
 import { Clock, Calendar, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypePrettyCode from 'rehype-pretty-code';
 import 'katex/dist/katex.min.css';
 
 // Generate static params for all posts
@@ -38,7 +41,9 @@ export default async function PostPage({ params }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
+      <ReadingProgress />
       <Navigation />
+      <TableOfContents />
 
       <article className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-6">
@@ -145,7 +150,16 @@ export default async function PostPage({ params }) {
                 options={{
                   mdxOptions: {
                     remarkPlugins: [remarkMath],
-                    rehypePlugins: [rehypeKatex],
+                    rehypePlugins: [
+                      rehypeKatex,
+                      [
+                        rehypePrettyCode,
+                        {
+                          theme: 'github-dark',
+                          keepBackground: true,
+                        },
+                      ],
+                    ],
                   },
                 }}
               />
