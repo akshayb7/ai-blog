@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Compass, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Compass, Github, Linkedin, Globe, Mail } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -32,18 +32,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/categories" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                  Categories
-                </Link>
-              </li>
-              <li>
                 <Link href="/about" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   About
-                </Link>
-              </li>
-              <li>
-                <Link href="/rss" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                  RSS Feed
                 </Link>
               </li>
             </ul>
@@ -54,34 +44,38 @@ export default function Footer() {
             <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">Connect</h3>
             <div className="flex space-x-3">
               <a
-                href="https://github.com"
+                href="https://github.com/akshayb7"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                aria-label="GitHub"
               >
-                <Github className="w-5 h-5 text-gray-700" />
+                <Github className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/akshayb7/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                aria-label="LinkedIn"
               >
-                <Linkedin className="w-5 h-5 text-gray-700" />
+                <Linkedin className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://portfolio.akshayworks.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                aria-label="Portfolio"
               >
-                <Twitter className="w-5 h-5 text-gray-700" />
+                <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </a>
               <a
-                href="mailto:hello@ailab.com"
-                className="p-2 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                href="mailto:akshay10.bhardwaj@gmail.com"
+                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                aria-label="Email"
               >
-                <Mail className="w-5 h-5 text-gray-700" />
+                <Mail className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </a>
             </div>
           </div>

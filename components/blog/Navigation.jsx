@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, Search, Compass } from 'lucide-react';
+import { Menu, X, Compass } from 'lucide-react';
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,9 +39,6 @@ export default function Navigation() {
                 {link.name}
               </Link>
             ))}
-            <button className="p-2 hover:bg-white/50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
-              <Search className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            </button>
           </div>
 
           {/* Mobile Menu Button */}

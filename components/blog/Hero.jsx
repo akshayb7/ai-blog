@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Brain, Code, BookOpen, Sparkles } from 'lucide-react';
 
 export default function Hero() {
@@ -28,9 +29,11 @@ export default function Hero() {
         <div className="flex flex-wrap justify-center gap-3">
           {categories.map((cat) => {
             const Icon = cat.icon;
+            const categorySlug = cat.name.toLowerCase().replace(/\s+/g, '-');
             return (
-              <button
+              <Link
                 key={cat.name}
+                href={`/category/${categorySlug}`}
                 className="px-4 py-2 rounded-full border border-white/20 hover:scale-105 transition-transform glass-card"
               >
                 <div className="flex items-center space-x-2">
@@ -39,7 +42,7 @@ export default function Hero() {
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{cat.name}</span>
                 </div>
-              </button>
+              </Link>
             );
           })}
         </div>

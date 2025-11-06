@@ -1,6 +1,6 @@
 import Navigation from '@/components/blog/Navigation';
 import Footer from '@/components/blog/Footer';
-import { Compass, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Compass, Github, Linkedin, Globe, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
@@ -92,38 +92,38 @@ export default function AboutPage() {
             
             <div className="flex justify-center space-x-4">
               <a
-                href="https://github.com"
+                href="https://github.com/akshayb7"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                className="p-3 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
                 aria-label="GitHub"
               >
-                <Github className="w-6 h-6 text-gray-700" />
+                <Github className="w-6 h-6 text-gray-700 dark:text-gray-300" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/akshayb7/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                className="p-3 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
                 aria-label="LinkedIn"
               >
-                <Linkedin className="w-6 h-6 text-gray-700" />
+                <Linkedin className="w-6 h-6 text-gray-700 dark:text-gray-300" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://portfolio.akshayworks.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-lg hover:bg-white/50 transition-colors glass-card"
-                aria-label="Twitter"
+                className="p-3 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                aria-label="Portfolio"
               >
-                <Twitter className="w-6 h-6 text-gray-700" />
+                <Globe className="w-6 h-6 text-gray-700 dark:text-gray-300" />
               </a>
               <a
-                href="mailto:hello@ailab.com"
-                className="p-3 rounded-lg hover:bg-white/50 transition-colors glass-card"
+                href="mailto:akshay10.bhardwaj@gmail.com"
+                className="p-3 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
                 aria-label="Email"
               >
-                <Mail className="w-6 h-6 text-gray-700" />
+                <Mail className="w-6 h-6 text-gray-700 dark:text-gray-300" />
               </a>
             </div>
           </div>
