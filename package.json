@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "flexsearch": "^0.8.212",
     "framer-motion": "^12.23.24",
     "gray-matter": "^4.0.3",
     "katex": "^0.16.25",
