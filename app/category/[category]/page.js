@@ -24,8 +24,8 @@ export async function generateMetadata({ params }) {
     .join(' ');
   
   return {
-    title: `${displayCategory} Posts | AI Lab`,
-    description: `Browse all ${displayCategory} posts`,
+    title: `${displayCategory} Posts | Akshay\'s Expedition Logs`,
+    description: `Browse all ${displayCategory} expedition logs`,
   };
 }
 
@@ -41,7 +41,7 @@ export default async function CategoryPage({ params }) {
   const posts = getPostsByCategory(displayCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
       <Navigation />
 
       <main className="pt-24 pb-20">
@@ -49,7 +49,7 @@ export default async function CategoryPage({ params }) {
           {/* Back Button */}
           <Link 
             href="/"
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+            className="inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-8 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
@@ -58,14 +58,14 @@ export default async function CategoryPage({ params }) {
           {/* Header */}
           <div className="mb-12">
             <div className="mb-4">
-              <span className="glass-card px-4 py-2 rounded-full text-sm font-medium text-gray-700 border border-white/20">
+              <span className="glass-card px-4 py-2 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 border border-white/20">
                 {displayCategory}
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               {displayCategory} Posts
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 dark:text-gray-300">
               {posts.length} {posts.length === 1 ? 'post' : 'posts'} in this category
             </p>
           </div>
@@ -79,7 +79,7 @@ export default async function CategoryPage({ params }) {
             </div>
           ) : (
             <div className="glass-card rounded-2xl p-12 text-center border border-white/20">
-              <p className="text-gray-600 text-lg">No posts in this category yet.</p>
+              <p className="text-gray-600 dark:text-gray-300 text-lg">No posts in this category yet.</p>
             </div>
           )}
         </div>

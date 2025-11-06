@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Improved Glassmorphism utilities with better contrast */
+/* Light Mode Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
@@ -11,12 +11,11 @@
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+/* Dark Mode Glass - Deep blacks with subtle transparency */
+.dark .glass {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
 }
 
 .glass-card {
@@ -27,14 +26,31 @@
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
+/* Dark Mode Cards - Rich dark backgrounds */
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
 .glass-card:hover {
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2);
 }
 
+.dark .glass-card:hover {
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 12px 40px 0 rgba(59, 130, 246, 0.3);
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Dark mode background */
+.dark {
+  color-scheme: dark;
 }
 
 /* Hide scrollbar but keep functionality */
@@ -49,6 +65,11 @@ html {
 /* Better text contrast */
 body {
   color: #1f2937;
+}
+
+.dark body {
+  color: #f1f5f9;
+  background: #0f172a;
 }
 
 /* Code block styling for rehype-pretty-code */

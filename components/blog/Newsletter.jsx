@@ -15,8 +15,8 @@ export default function Newsletter() {
 
   return (
     <div className="glass-card rounded-3xl p-8 md:p-12 text-center border border-white/20">
-      <h2 className="text-3xl font-bold text-gray-900 mb-4">Stay Updated</h2>
-      <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">Stay Updated</h2>
+      <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
         Get the latest posts on ML, AI, and GenAI delivered to your inbox. No spam, just quality content.
       </p>
       

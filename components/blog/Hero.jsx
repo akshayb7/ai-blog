@@ -15,10 +15,10 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto">
         {/* Main Heading */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 bg-clip-text text-transparent leading-tight">
-            Welcome to AI Lab
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 dark:from-gray-100 dark:via-blue-300 dark:to-cyan-300 bg-clip-text text-transparent leading-tight">
+            Akshay's Expedition Logs
           </h1>
-          <p className="text-xl text-gray-600 leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
             Exploring Machine Learning, Deep Learning, and Generative AI through 
             practical implementations and visual explanations
           </p>
@@ -37,7 +37,7 @@ export default function Hero() {
                   <div className={`bg-gradient-to-r ${cat.color} p-1 rounded`}>
                     <Icon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{cat.name}</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{cat.name}</span>
                 </div>
               </button>
             );

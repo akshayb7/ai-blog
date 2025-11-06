@@ -4,7 +4,7 @@ import { Clock, ArrowRight } from 'lucide-react';
 export default function FeaturedPost({ post }) {
   return (
     <div className="mb-20">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Featured</h2>
       
       <Link href={`/posts/${post.slug}`}>
         <div className="glass-card rounded-3xl overflow-hidden border border-white/20 hover:scale-[1.02] transition-transform duration-300 cursor-pointer group">

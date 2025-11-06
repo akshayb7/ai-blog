@@ -30,7 +30,7 @@ export default function PostCard({ post }) {
 
         <div className="p-6">
           {/* Meta Info */}
-          <div className="flex items-center space-x-3 text-xs text-gray-500 mb-3">
+          <div className="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
             <span className="flex items-center space-x-1">
               <Clock className="w-3 h-3" />
               <span>{post.readTime}</span>
@@ -40,12 +40,12 @@ export default function PostCard({ post }) {
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
             {post.title}
           </h3>
 
           {/* Excerpt */}
-          <p className="text-gray-600 line-clamp-2 text-sm leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 line-clamp-2 text-sm leading-relaxed">
             {post.excerpt}
           </p>
         </div>
