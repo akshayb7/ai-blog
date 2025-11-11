@@ -1,0 +1,305 @@
+---
+title: "Why Ray? From Python Scripts to Distributed Clusters"
+date: "2025-11-10"
+description: "Part 1 of an 8-part deep dive into Ray's architecture. How Ray transforms simple Python code into distributed execution, and why it succeeds where Celery, Spark, and other tools struggle."
+category: "Distributed Systems"
+tags: ["Ray", "Distributed Computing", "Python", "ML Infrastructure", "Architecture"]
+featured: true
+image: "/images/ray-architecture-part1.jpg"
+series: "Ray Architecture Deep Dive"
+seriesPart: 1
+---
+
+I first encountered Ray at Mechademy, where we were building ML models for turbomachinery monitoring—not one model but thousands. Each turbine or compressor behaved differently, so a single model wouldn't cut it.
+
+Scaling to hundreds of clients meant training and maintaining thousands of models. Our Python code worked for a few, but scaling while keeping client data secure and training fast was impossible.
+
+That's when we rebuilt our ML lifecycle around Ray, Dask for data processing, and MLflow for experiment tracking. It took real work to architect, but the payoff changed how we thought about the problem.
+
+The "click" moment came when we trained an XGBoost model on data larger than any single machine's RAM. The dataset was distributed, the training parallel—and it just worked. No manual partitioning or orchestration code. Ray and Dask handled the distribution; we focused on the ML.
+
+And we weren't alone. Teams across industries—retail, finance, design—were hitting the same wall.
+
+Instacart, for example, trained thousands of regional ML models. Their Celery setup ran at 10–15% CPU utilization and 4-hour training times. After moving to Ray, CPU utilization hit 80%, and runs dropped to 20 minutes—same hardware, same models, better execution.
+
+Coinbase saw similar gains: their 120-minute data-transform pipeline fell to 15 minutes, letting them run 15× more ML jobs at the same cost.
+
+Traditional tools like Celery, Spark, or single-machine workflows worked fine at small scale but broke down when you needed to:
+
+- Train many models in parallel
+- Handle data larger than a single machine's memory
+- Iterate quickly on experiments
+- Actually use compute efficiently
+
+Why did these tools all hit the same wall—and what was Ray doing differently?
+
+Let's look at Ray in action, then explore why it works where others stumble.
+
+---
+
+## A Pattern Emerges
+
+Across companies, the story repeated: different domains, same scaling pain.
+
+**Coinbase** had a monolithic ML platform—slow pipelines, redundant hyperparameter runs, hours-long iteration cycles.
+
+**Uber** needed massive hyperparameter searches but couldn't dynamically allocate heterogeneous compute.
+
+**Canva** trained hundreds of ML models, yet single-machine limits kept GPU utilization low and training expensive.
+
+### What They Tried Before Ray
+
+Most teams tried familiar tools:
+
+**Celery** — mature, Python-native, great for async queues—but not built for compute-heavy work. Workers were overprovisioned, often 10–15% busy.
+
+**Spark** — excellent for ETL and batch analytics, but its JVM base and batch execution model made iterative ML training awkward.
+
+**Single-machine multiprocessing** — fine for prototypes, but bounded by one machine's RAM and manual coordination.
+
+**Ad-hoc distributed systems** — possible, if you wanted to maintain your own distributed infrastructure.
+
+### Why They Fell Short
+
+None of these tools were bad—they just optimized for narrow workloads. Celery excelled at queues, Spark at DataFrames, multiprocessing at local parallelism.
+
+ML pipelines need all of it:
+
+- Fine-grained parallelism for many small models
+- Stateful services for custom loops or serving
+- Efficient data sharing
+- Dynamic execution graphs
+- Heterogeneous resources (CPU, GPU, memory)
+
+Existing frameworks made you pick one dimension. Modern ML needs them all.
+
+So what makes Ray work where others fail? Let's see with a quick example.
+
+---
+
+## Enter Ray: A Simple Example
+
+Before diving into architecture, let's look at a simple parallel preprocessing example.
+
+### The Scenario
+
+You have eight datasets to process: load data, compute SVD, and preprocess. Each takes about 1.25 seconds. Sequentially, that's around 10 seconds total.
+
+### Sequential Python
+
+```python
+import time
+import numpy as np
+
+def extract_features(seed):
+    rng = np.random.default_rng(seed)
+    data = rng.standard_normal((800, 800))
+    _ = np.linalg.svd(data, full_matrices=False)
+    time.sleep(0.25)
+    return True
+
+start = time.perf_counter()
+for i in range(8):
+    extract_features(i)
+print(f"Time: {time.perf_counter() - start:.2f}s")
+# Output: ~10 seconds
+```
+
+### The Ray Version
+
+```python
+import time
+import numpy as np
+import ray
+
+@ray.remote
+def extract_features(seed):
+    rng = np.random.default_rng(seed)
+    data = rng.standard_normal((800, 800))
+    _ = np.linalg.svd(data, full_matrices=False)
+    time.sleep(0.25)
+    return True
+
+ray.init()
+start = time.perf_counter()
+futures = [extract_features.remote(i) for i in range(8)]
+ray.get(futures)
+print(f"Time: {time.perf_counter() - start:.2f}s")
+ray.shutdown()
+# Output: ~2.5 seconds on 4 cores
+```
+
+A 4-core laptop finishes in about 2.5 seconds—a 4× speedup.
+
+### What Just Happened?
+
+Three simple changes make this work:
+
+1. **`@ray.remote`** marks the function as executable on any worker—the logic itself stays identical
+2. **`.remote()`** schedules execution asynchronously and returns a future (a promise of a result)
+3. **`ray.get()`** blocks until all tasks complete and returns the actual results
+
+Ray starts worker processes on each core, distributes tasks, and tracks results—no manual thread management, process pools, or synchronization code needed.
+
+### Why This Works
+
+When you call `ray.init()`, Ray starts worker processes (one per CPU core by default). Each `.remote()` call submits a task to Ray's scheduler, which distributes work across available workers.
+
+In our example:
+
+- **Sequential version**: 8 tasks × 1.25 seconds each = 10 seconds
+- **Ray version**: 8 tasks across 4 workers = ~2.5 seconds (10 ÷ 4)
+
+Your 4 cores finally work in parallel—no threads, pools, or locks needed.
+
+### Why It Matters
+
+You didn't rewrite your code; you just annotated it. That same pattern scales to:
+
+- Hundreds of parallel model training jobs
+- Hyperparameter sweeps across configurations
+- Processing datasets larger than memory
+- Building stateful distributed services
+
+Now, let's see why Ray can do this when others can't.
+
+---
+
+## Why Ray Is Different
+
+If distributed execution can be that simple, why weren't Celery or Spark doing it?
+
+### The Design Insight
+
+Around 2018, the landscape looked like this:
+
+- **Spark** dominated ETL but forced DataFrame thinking
+- **Dask** gave Python parallelism but lacked stateful workloads
+- **Celery** handled queues but wasted compute
+
+Each solved one dimension—task, data, or state—not all three.
+
+ML pipelines, however, blur those lines: preprocess in parallel, train on distributed data, serve stateful models, orchestrate thousands of trials.
+
+Ray's idea was bold yet simple: *one framework unifying tasks, data, and state*.
+
+### Three Key Innovations
+
+#### 1. Unified Task + Actor Model
+
+**Tasks** are stateless functions; **actors** are stateful Python classes.
+
+```python
+@ray.remote
+class ModelServer:
+    def __init__(self, path):
+        self.model = load_model(path)
+    
+    def predict(self, data):
+        return self.model.predict(data)
+
+server = ModelServer.remote("model.pkl")
+result = ray.get(server.predict.remote(new_data))
+```
+
+Actors stay alive, hold state, and can launch tasks—enabling reinforcement learning agents, hyperparameter coordinators, or custom training loops within one framework.
+
+#### 2. Python-Native Runtime
+
+Unlike Spark's JVM bridge, Ray is built *for* Python. Your NumPy arrays and PyTorch tensors stay native, avoiding serialization overhead and Python-to-JVM translation penalties.
+
+When Coinbase moved from Spark to Ray, that 8× speedup wasn't just better scheduling—it was eliminating the constant Python/JVM translation layer.
+
+#### 3. Fine-Grained, Flexible Scheduling
+
+Ray's distributed scheduler handles *millions of tasks per second*. You control parallelism—spawn 10,000 small tasks, decide next steps dynamically, or assign custom resource needs per task ("2 CPUs here, 1 GPU there").
+
+This flexibility let teams like Uber build sophisticated systems like Autotune without fighting the framework.
+
+### The Results
+
+Remember those metrics from earlier?
+
+- **Instacart**: 10% → 80% CPU utilization
+- **Coinbase**: 8× faster transforms, 15× more jobs
+- **Canva**: 12× faster iteration cycles
+
+These aren't mere speedups—they're proof of architecture built for ML from the ground up.
+
+When you write `@ray.remote`, you're tapping into a runtime built for the dynamic reality of ML engineering.
+
+So what happens under the hood when you call `ray.init()`?
+
+---
+
+## How Ray Does It (Architecture Preview)
+
+Calling `ray.init()` launches a distributed system, not just a library. Three core components coordinate to schedule tasks and manage data.
+
+### 1. Raylet (The Node Manager)
+
+Every machine runs a Raylet process that handles:
+
+- Task scheduling on the node
+- Resource tracking (CPU, GPU, memory)
+- Worker process management
+
+Each `.remote()` call becomes a task the Raylet assigns to a worker.
+
+### 2. Global Control Store (GCS) — The Brain
+
+The GCS maintains the cluster-wide view: alive nodes, object locations, task metadata, and resources. When data is needed across nodes, the GCS directs the transfer.
+
+### 3. Object Store (Shared Memory)
+
+Each node hosts an object store in shared memory. Task results go there; subsequent tasks read by reference without re-serialization. One 10GB array, many readers, no copies.
+
+### How It All Flows
+
+```
+1. ray.init()
+   → starts Raylet + Object Store, connects to GCS
+
+2. extract_features.remote(0)
+   → scheduled on worker, result stored in Object Store
+
+3. ray.get()
+   → fetches from local or remote store
+```
+
+Everything happens transparently. You write simple Python; Ray handles execution and data placement.
+
+### Why It Scales
+
+- **Fast dispatch**: Distributed scheduling achieves million-task-per-second rates
+- **Efficient data sharing**: Shared memory minimizes copies
+- **Fault tolerance**: GCS knows what failed and re-runs tasks
+- **Flexible execution**: Tasks and actors are entries with resource tags, allowing smart placement decisions
+
+---
+
+## What's Next
+
+This is the 30,000-foot view. In **Part 2**, we'll trace `ray.init()` line by line—how Ray boots its runtime, registers nodes, and prepares to execute tasks.
+
+The series roadmap:
+
+- **Part 3**: Task and actor serialization & execution
+- **Part 4**: Scheduling & resource management
+- **Part 5**: Object store and data transfer
+- **Part 6**: GCS and cluster coordination
+- **Part 7**: Fault tolerance and recovery
+- **Part 8**: Production patterns and best practices
+
+Before continuing, try the example yourself:
+
+```bash
+pip install ray numpy
+python ray_example.py
+```
+
+Watch your CPU cores light up and see parallelism in action. Use `htop` or Activity Monitor to visualize all cores working simultaneously—it's surprisingly satisfying.
+
+---
+
+*This series shares what I've learned working on ML infrastructure at Mechademy, where we use Ray to train thousands of custom turbomachinery models. Part 2 coming soon.*
