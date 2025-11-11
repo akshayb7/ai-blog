@@ -25,7 +25,7 @@ export async function generateMetadata({ params }) {
   const { frontmatter } = getPostBySlug(slug);
   
   return {
-    title: `${frontmatter.title} | Akshay\'s Expedition Logs`,
+    title: `${frontmatter.title} | Akshay's Expedition Logs`,
     description: frontmatter.description,
     openGraph: {
       title: frontmatter.title,
@@ -128,25 +128,21 @@ export default async function PostPage({ params }) {
             )}
           </header>
 
-          {/* Post Content */}
+          {/* Post Content - THIS IS THE IMPORTANT PART */}
           <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/20">
-            <div className="prose prose-lg prose-gray dark:prose-invert max-w-none
-              prose-headings:font-bold 
-              prose-h1:text-4xl prose-h1:mb-6 prose-h1:text-gray-900 dark:prose-h1:text-gray-100
-              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:text-gray-900 dark:prose-h2:text-gray-100
-              prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-gray-900 dark:prose-h3:text-gray-100
-              prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-semibold
-              prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-pink-50 dark:prose-code:bg-pink-950/30 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-              prose-pre:bg-slate-900 dark:prose-pre:bg-slate-950 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:p-6 prose-pre:border prose-pre:border-slate-700
-              prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-ul:text-gray-700 dark:prose-ul:text-gray-300
-              prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6 prose-ol:text-gray-700 dark:prose-ol:text-gray-300
-              prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-li:my-2
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-400 prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-950/30 prose-blockquote:py-2
-              prose-img:rounded-xl prose-img:shadow-lg
-              prose-hr:border-gray-200 dark:prose-hr:border-gray-700
-              prose-table:text-gray-700 dark:prose-table:text-gray-300
+            <div className="prose prose-lg dark:prose-invert max-w-none
+              prose-headings:scroll-mt-24
+              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
+              prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
+              prose-p:leading-relaxed prose-p:mb-6
+              prose-a:no-underline hover:prose-a:underline
+              prose-code:text-sm prose-code:font-normal
+              prose-pre:bg-slate-900 dark:prose-pre:bg-slate-950 prose-pre:rounded-xl prose-pre:p-6 prose-pre:border prose-pre:border-slate-700
+              prose-ul:my-6 prose-ol:my-6
+              prose-li:my-2
+              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-950/30 prose-blockquote:py-2 prose-blockquote:my-6
+              prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
+              prose-hr:border-gray-200 dark:prose-hr:border-gray-700 prose-hr:my-8
             ">
               <MDXRemote 
                 source={content}
