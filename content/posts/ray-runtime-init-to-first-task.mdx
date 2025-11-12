@@ -1,0 +1,687 @@
+---
+title: "The Ray Runtime: From ray.init() to Your First Task"
+date: "2025-11-13"
+description: "Understanding what happens behind ray.init()—the processes that launch, how they coordinate, and the flow from your code to distributed execution."
+category: "Distributed Systems"
+tags: ["Ray", "Distributed Computing", "Python", "ML Infrastructure", "Architecture", "Debugging"]
+featured: false
+image: "/images/ray-architecture-part2.jpg"
+series: "Ray Architecture Deep Dive"
+seriesPart: 2
+---
+
+Everything looked perfect.
+
+`kubectl get pods` showed a sea of green. The Ray dashboard loaded. Every service was running.
+
+And yet—our XGBoost jobs just sat there. Pending. Forever.
+
+At Mechademy, we'd spent weeks getting Ray onto AWS with Helm—Kubernetes networking, persistent volumes, IAM roles, the works. Finally the cluster was up… and doing absolutely nothing.
+
+SSH into pods? Sure. Python processes everywhere. Logs, too—but which ones mattered? The raylet complained about "waiting for GCS." Workers looked alive but never received tasks. We even launched SageMaker notebooks inside the VPC because nothing external could reach the cluster.
+
+It felt like standing outside a glass-walled building—machines humming inside—while you rattled the locked door, unable to figure out what was happening within.
+
+You're not alone in that moment.
+
+I spent hours trawling [Ray's GitHub issues](https://github.com/ray-project/ray/issues) and [community threads](https://discuss.ray.io/), and the pattern was always the same: clusters that start successfully but silently fail at execution. Kubernetes deployments with network policies blocking communication between pods. Databricks users whose initialization scripts fail with cryptic path errors that only surface at runtime. OpenShift clusters where core operators haven't finished starting, causing the whole system to hang during initialization.
+
+Green status lights hiding invisible misconfigurations—blocked network ports between nodes, missing environment variables, object stores that never mounted. The system looks healthy, but no work ever happens.
+
+That's when `ray.init()` stopped being an API call and became a survival skill. Once you understand which processes should exist, how they talk, and where they log, debugging stops feeling like guesswork and turns into detective work.
+
+So I started reading the Ray source code—not all 500K lines, just the startup path. What emerged was surprisingly elegant: a small set of cooperating processes that, once mapped, explain almost every "cluster is up but tasks won't run" scenario.
+
+Our breakthrough came when we stopped treating `ray.init()` as magic and began asking concrete questions:
+
+- Is the GCS process running and healthy?
+- Can worker nodes reach the head's GCS endpoint (network/policy/port)?
+- Are raylet processes registering and spawning workers?
+- Is the object store mounted and accessible on each node?
+
+Don't worry if those terms sound new—we'll unpack them. The key is that each question has a precise place to check: a log file, a dashboard entry, a process name. Once you know that map, the fog lifts.
+
+The day we built that mental model, debugging went from hours to minutes. When a task stalled, we knew exactly where to look: Raylet logs for scheduling, GCS logs for cluster state, object-store metrics for memory pressure.
+
+That's what this post is about. Not the syntax of `ray.init()`, but the system it awakens—the components that boot, handshake, and coordinate the work your code describes.
+
+If [Part 1](/posts/why-ray-from-python-to-distributed) showed Ray as a black box that "just works," this part opens the box. Think of Ray as a distributed company: the GCS is the executive office tracking all operations, each Raylet is a regional manager coordinating local teams, workers are employees executing tasks, and the object store is the shared file room where everyone accesses completed work.
+
+Once you understand how the company is organized, the chaos makes sense.
+
+Let's open the doors and step inside.
+
+---
+
+## Two Ways to Start Your Company
+
+When you call `ray.init()`, Ray makes a fundamental decision: should it start a new company, or connect to an existing one?
+
+This isn't just API trivia. Understanding these two modes explains why your laptop behaves differently from your production cluster, and why debugging strategies change between development and deployment.
+
+### Local Mode: The Startup Office
+
+On your laptop, `ray.init()` with no arguments launches everything:
+
+```python
+import ray
+ray.init()  # Starts executives, managers, workers, file room—everything
+```
+
+Within seconds, Ray spins up a complete distributed system on a single machine. You get the GCS (executive office), one Raylet (regional manager), several workers (employees), and an object store (shared file room). It's a fully functional company, just smaller.
+
+This is perfect for development. You can test distributed code without deploying infrastructure. When something breaks, all the logs are on your machine. No SSH, no VPCs, no network debugging.
+
+At Mechademy, every engineer runs Ray locally first. We prototype XGBoost training pipelines on laptop-sized data, verify the logic works, then deploy to AWS. Local mode catches 90% of bugs before they touch production.
+
+### Cluster Mode: The Enterprise
+
+Production is different. You don't want computation on your laptop—you want a cluster of powerful machines working together.
+
+At Mechademy, we deploy Ray clusters to AWS EKS using [KubeRay](https://docs.ray.io/en/latest/cluster/kubernetes/getting-started.html) (Helm charts). KubeRay handles the infrastructure—launching head and worker pods, configuring networking, mounting storage. Once the cluster is running, our platform connects to it:
+
+```python
+# Our ML lifecycle platform submits jobs to the cluster
+ray.init(address="ray://<cluster-service>:10001")
+```
+
+The cluster has one head node running coordination services (GCS, dashboard, scheduling) and multiple worker nodes providing computational muscle. Our platform becomes a client—we submit work through pre-defined job flows, retrieve results, but don't execute anything locally.
+
+Jobs get triggered two ways:
+
+1. **From our platform**: Users define ML lifecycle workflows, our system submits them as Ray jobs
+2. **From schedules**: Managed on the Ray head node itself for recurring training runs
+
+### The Decision Path
+
+Inside `ray/_private/worker.py`, Ray's logic is straightforward:
+
+```python
+def init(address=None, ...):
+    if address is None:
+        # No address? Start local company
+        node = Node(...)
+        node.start()  # Launch all processes here
+    else:
+        # Address provided? Connect to existing enterprise
+        connect_to_cluster(address)
+```
+
+One parameter changes everything. `address=None` means "I'm the company." `address="ray://..."` means "I'm a client bringing work."
+
+### When to Use Each
+
+| Scenario | Mode | Why |
+|----------|------|-----|
+| Writing new code | Local | Fast iteration, easy debugging |
+| Running tests | Local | Reproducible, no infrastructure needed |
+| Production training | Cluster | Scale to real data and compute |
+| Scheduled jobs | Cluster | Leverage remote resources, persistent infrastructure |
+| Platform-managed workflows | Cluster (connect) | Central job orchestration |
+
+### How KubeRay Sets Up the Enterprise
+
+When we deploy with KubeRay, Helm manages the entire distributed company:
+
+```yaml
+# KubeRay creates:
+# - Head pod: GCS, dashboard, one Raylet
+# - Worker pods: Multiple Raylets with GPUs/CPUs
+# - Services: Networking between pods
+# - Volumes: Persistent storage for logs and checkpoints
+```
+
+The head pod runs with minimal CPU allocation—coordination only, no heavy computation. Worker pods get the GPUs and large CPU counts for actual work. KubeRay handles scaling, health checks, and networking configuration that would be painful to manage manually.
+
+### Why This Matters for Debugging
+
+When your local code works but the cluster fails, the problem is usually environmental:
+
+- **Local mode**: Single process space, shared memory, no network
+- **Cluster mode**: Multiple machines, network latency, Kubernetes policies, distributed state
+
+Those GCS connection errors we hit at Mechademy? They only appeared in cluster mode because worker pods couldn't reach the head node's GCS port through our Kubernetes network policies. Locally, everything was localhost—no network to misconfigure.
+
+Understanding the two modes helped us reproduce issues. We could test job submission logic locally before deploying to the KubeRay cluster, catching workflow assumptions before they touched production infrastructure.
+
+Next, let's see what actually starts when you call `ray.init()` in local mode. What processes launch? How do they coordinate? What's running on your machine right now?
+
+---
+
+## Opening Day: The Startup Sequence
+
+**A note on specifics**: Process names, port numbers, and default configurations shown here are typical for recent Ray versions on Linux. If you're using KubeRay or a different platform, verify these details against your Helm values and deployment logs. The concepts remain the same even when the specifics vary.
+
+Let's watch what happens when you call `ray.init()` on your laptop. This is opening day—setting up the executive office, hiring managers, onboarding workers.
+
+Open a terminal and try this:
+
+```python
+import ray
+ray.init()
+```
+
+You'll see output like:
+
+```
+2024-11-13 10:30:15,234	INFO worker.py:1724 -- Started a local Ray instance.
+Dashboard running on http://127.0.0.1:8265
+```
+
+Behind that simple message, Ray just launched an entire distributed company. Let's see what's actually running.
+
+### What's Running on Your Machine
+
+Open another terminal and run:
+
+```bash
+ps aux | grep ray
+```
+
+You'll see several processes (exact names vary by platform):
+
+- `ray::GCS` - The executive office
+- `ray::RAYLET` - Your regional manager
+- `ray::IDLE` - Workers ready for assignments
+- `ray_dashboard` - The company metrics dashboard
+- `ray_log_monitor` - Aggregates logs from all departments
+
+Each process has a specific job. Let's walk through the startup sequence.
+
+### Step 1: Resource Assessment
+
+Before launching anything, Ray surveys your machine:
+
+```python
+# How many CPUs do you have?
+num_cpus = os.cpu_count()  # 8 on my laptop
+
+# Any GPUs?
+num_gpus = detect_gpus()  # 0 for most laptops
+
+# How much shared memory available?
+object_store_memory = check_dev_shm()  # Usually a few GB
+```
+
+This is like assessing office capacity before hiring. Ray won't promise resources it can't deliver.
+
+### Step 2: Opening the Executive Office (GCS)
+
+The GCS (Global Control Store) starts first. It's the operational hub for the entire company:
+
+- **What it tracks**: Offices (nodes), projects (tasks), departments (actors), files (objects), budgets (resources)
+- **Where it stores data**: In-memory (or Redis for production)
+- **Port**: Commonly 6379 by default (verify in your deployment)
+- **Location in code**: `ray/_private/gcs_server.py`
+
+The GCS is like the executive dashboard. Every other component reports to it: "I exist, here's my location, here's my capacity."
+
+### Step 3: Hiring Regional Management (Raylet)
+
+Next, the Raylet launches. This is your regional manager coordinating local operations:
+
+- **What it does**: Work assignment, employee management, resource tracking
+- **Components inside**: NodeManager (scheduling), ObjectManager (file transfers)
+- **Location in code**: `src/ray/raylet/`
+
+The Raylet immediately checks in with the executive office:
+
+```
+"Executive team, this is Regional Office A. I have 8 employees available and 2GB of file room space."
+```
+
+### Step 4: Setting Up the File Room (Object Store)
+
+The object store allocates shared memory—usually from `/dev/shm` on Linux:
+
+- **What it does**: Stores work results in shared memory for instant access
+- **Size**: Configurable, typically defaults to ~30% of system RAM (varies by deployment)
+- **Technology**: Apache Plasma (shared memory manager)
+
+This is your centralized file room where completed work gets stored. Multiple employees can access the same files without making copies—they just read from the shared cabinet.
+
+### Step 5: Onboarding Workers
+
+The Raylet spawns several worker processes upfront:
+
+```python
+# Workers start ready to go
+for i in range(num_initial_workers):
+    worker = spawn_worker_process()
+    worker_pool.add_idle(worker)
+```
+
+Workers are your employees—they execute the actual work. The regional manager assigns tasks based on who's available, but each worker operates autonomously once assigned.
+
+### Step 6: Installing the Metrics Dashboard
+
+Finally, the dashboard starts on port 8265 (typically the default):
+
+```
+Dashboard running on http://127.0.0.1:8265
+```
+
+Open that URL and you'll see:
+
+- Company overview (offices, resources)
+- Project timeline
+- Employee utilization
+- Storage usage
+- Logs from all departments
+
+The dashboard gives you real-time visibility into company operations. Which employees are busy? Any projects stuck? Is the file room running out of space?
+
+### The Check-In Process
+
+Once everything's running, components coordinate:
+
+1. **Raylet → GCS**: "Regional Office online at 192.168.1.5 with 8 employees"
+2. **GCS → Raylet**: "Acknowledged. You're office_id abc123"
+3. **Workers → Raylet**: "We're ready for assignments"
+4. **Dashboard → GCS**: "Show me company status"
+
+It's like the morning stand-up—everyone reports their status, the executive office updates the master tracking system, and work can begin.
+
+### What You Can Observe
+
+Try this experiment:
+
+```python
+import ray
+ray.init()
+
+# Check company resources
+print(ray.cluster_resources())
+# Output: {'CPU': 8.0, 'memory': 17179869184, 'node:192.168.1.5': 1.0, 'object_store_memory': 2147483648}
+
+# Open dashboard
+# Visit http://localhost:8265
+```
+
+In the dashboard:
+
+- Click "Cluster" → See your single office
+- Click "Jobs" → Currently empty
+- Click "Metrics" → CPU/memory graphs initializing
+
+Every component Ray started is visible, logged, and monitorable. No hidden magic.
+
+### When Things Go Wrong
+
+Remember those GCS connection errors at Mechademy? Understanding this startup sequence made debugging obvious:
+
+- **Symptom**: Workers showed as idle, tasks pending
+- **Check**: `ps aux | grep ray` → All processes running ✅
+- **Check**: Dashboard → Cluster showed 0 nodes ❌
+- **Diagnosis**: Workers couldn't reach GCS port (Kubernetes NetworkPolicy issue)
+- **Fix**: Update policy to allow pod-to-pod traffic on port 6379
+
+Knowing what *should* start, and what *should* connect to what, turned "mysterious failure" into "network configuration bug."
+
+### The Company Is Open
+
+In under a second, `ray.init()` went from nothing to a fully coordinated distributed company. The executive office is tracking operations. Regional management is ready. Workers are standing by. The file room is prepared.
+
+Now let's see what happens when you actually give them work to do. How does a project flow from your code through this organizational structure? That's next.
+
+---
+
+## Corporate Structure: How the Company Works
+
+Now that you've seen the startup sequence, let's understand how these components actually work together. Each has a clear responsibility, and knowing who does what makes debugging systematic instead of chaotic.
+
+### The Executive Office (GCS)
+
+The GCS is the operational hub—not micromanaging, but tracking company-wide state so everyone can coordinate.
+
+The GCS tracks five things:
+
+1. **Offices**: Which machines are part of the company (nodes)
+2. **Projects**: What work is running or pending (tasks)
+3. **Departments**: Long-running operations (actors - we'll cover these in Part 3)
+4. **Files**: Where work outputs are stored across the company (objects)
+5. **Resources**: Who has CPUs, GPUs, memory available
+
+When a regional manager needs to know "where is file abc123?" they check with the executive office. When the dashboard wants to show company status, it queries the GCS. It's the shared information system—not a command center.
+
+At Mechademy, when we debugged that GCS connection issue, the symptom was clear: workers couldn't check in with the executive office. The GCS logs showed connection attempts timing out. The Raylet logs showed repeated "failed to connect to GCS" errors. Once we knew the GCS was the information hub, we knew to check network connectivity first.
+
+### The Regional Manager (Raylet)
+
+Each node has a Raylet that handles local operations. Think of it as the on-site manager who knows what's happening in their office.
+
+The Raylet has two main responsibilities:
+
+**NodeManager** - Handles work assignment:
+
+- "I have 8 employees available, I can take this project"
+- "This project needs 4 GPUs, I don't have those—check with corporate for another office"
+- "Employee 3 just finished, they're available again"
+
+**ObjectManager** - Handles file transfers between offices:
+
+- "Project needs file abc123, it's in Office 2—fetch it"
+- "This result is 5GB, store it locally and tell corporate where it is"
+- "File room is full, archive older files to long-term storage"
+
+The Raylet doesn't make company-wide decisions—it manages local resources and coordinates with the GCS when needed. This separation is why Ray scales: each office handles its own domain, corporate just tracks where everything lives.
+
+### The File Room (Object Store)
+
+The object store is shared memory using Apache Plasma. This is where work outputs live temporarily—like a shared network drive.
+
+Why shared memory? Performance. When Project A produces a result that Project B needs, Ray doesn't email it or copy it. Instead:
+
+1. Project A stores result in file room (shared memory)
+2. Project B reads directly from the same location
+3. Zero copying, zero transfer overhead
+
+This is called zero-copy sharing. It's like putting completed work in a shared cabinet—anyone can access it without making duplicates.
+
+**Important**: Each node has its own object store in local shared memory. When a task on Node A needs data from Node B, Ray's ObjectManager handles the transfer between their respective file rooms. This per-node design is what allows Ray to scale—no single centralized data bottleneck.
+
+**Capacity matters**: The file room has limited space (typically ~30% of RAM by default). When it fills up:
+
+- Ray archives files to disk (slower but works)
+- Or removes files that haven't been accessed recently
+- You can configure size via [`ray.init(object_store_memory=...)`](https://docs.ray.io/en/latest/ray-core/api/doc/ray.init.html)
+
+At Mechademy, we size file rooms based on our training data. XGBoost models with 50GB datasets need large object stores. Smaller inference workloads can get by with defaults.
+
+### The Workers (Individual Contributors)
+
+Workers are Python processes that execute your actual code. When you call a Ray remote function, a worker runs it.
+
+Key characteristics:
+
+- **Project-focused**: Each task is independent
+- **Single-threaded**: Workers handle one project at a time
+- **Pre-hired**: Ray starts them during init, so projects begin immediately
+- **Managed locally**: The regional manager decides which worker gets which assignment
+
+Workers log to their own files (`worker-<id>.out`), which is crucial for debugging. When a project fails, you check that worker's log—not some central file.
+
+### The Metrics Dashboard
+
+The dashboard isn't just monitoring—it's your operational visibility tool. When something's wrong, this is where you start.
+
+Useful views:
+
+- **Cluster**: Are all offices registered? What resources are available?
+- **Jobs**: What's currently running? Any failures?
+- **Metrics**: CPU/memory/disk usage over time
+- **Logs**: Aggregated view of all department logs
+
+The dashboard queries the GCS for state and displays it. It doesn't control anything—it just makes company operations visible.
+
+### How They Communicate
+
+Here's the flow when you submit a project:
+
+```
+Your code → Raylet (regional manager)
+          ↓
+Raylet checks: Can my office handle this?
+          ↓
+If yes: Assign to available worker
+If no:  Check with GCS for office with capacity
+          ↓
+GCS responds: "Office 192.168.1.10 has resources"
+          ↓
+Raylet transfers project to that office's Raylet
+          ↓
+Remote Raylet assigns to their worker
+          ↓
+Worker executes, stores result in local file room
+          ↓
+Raylet updates GCS: "Project complete, result at file_id xyz"
+          ↓
+Your code retrieves result via file_id
+```
+
+No component commands another. They coordinate through the GCS and route work through the Raylet network.
+
+### Why This Structure Scales
+
+Centralized companies break at scale. If every decision required executive approval, the C-suite becomes a bottleneck.
+
+Ray avoids this:
+
+- **Raylets make local decisions** (no round-trip to GCS for every task)
+- **GCS only tracks metadata** (not data itself)
+- **File rooms are per-office** (no central data repository)
+- **Workers are autonomous** (parallel execution without constant coordination)
+
+This is why Ray handles thousands of nodes and millions of tasks. Each component has a focused responsibility, and they coordinate through shared state, not through commands.
+
+At Mechademy, understanding this structure changed how we debug. We stopped asking "why isn't Ray working?" and started asking specific questions: "Is the GCS accessible? Is the Raylet assigning work? Are workers accessing the file room?" Each component logs separately, fails independently, and can be diagnosed in isolation.
+
+Next, let's watch a real project flow through this system—from your Python code to distributed execution.
+
+---
+
+## Your First Project: Through the Company
+
+Let's watch a project flow through the system from start to finish:
+
+```python
+import ray
+ray.init()
+
+@ray.remote
+def process_data(x):
+    return x * 2
+
+# Submit the project
+result_ref = process_data.remote(5)
+result = ray.get(result_ref)
+print(result)  # 10
+```
+
+Simple code. Complex coordination. Let's trace what happens.
+
+### Step 1: Function Registration (`@ray.remote`)
+
+The decorator doesn't execute anything—it registers the function with the company:
+
+```python
+# Ray packages your function
+process_data = RemoteFunction(process_data)
+serialized = cloudpickle.dumps(process_data)
+
+# Registers with executive office
+gcs.register_function(function_id, serialized)
+# Now any office in the company can run this function
+```
+
+The `@ray.remote` decorator is like creating a standard operating procedure. Once filed with corporate, any regional office can execute it.
+
+### Step 2: Project Submission (`.remote(5)`)
+
+Calling `.remote()` submits a work order:
+
+```python
+# Create project specification
+project_spec = {
+    "function_id": "process_data_abc",
+    "args": [5],
+    "resources": {"CPU": 1},
+    "project_id": "task_xyz"
+}
+
+# Submit to regional manager
+local_raylet.submit_project(project_spec)
+```
+
+You're not doing the work yourself—you're delegating to the regional manager to coordinate.
+
+### Step 3: Work Assignment (Raylet + GCS)
+
+The regional manager decides where this runs:
+
+```python
+# Check local capacity
+if self.has_available_workers():
+    # Assign locally
+    worker = self.get_idle_worker()
+    worker.execute(project_spec)
+else:
+    # Check with corporate for another office
+    other_office = gcs.find_office_with_capacity(project_spec.resources)
+    forward_to(other_office, project_spec)
+```
+
+The Raylet first tries to handle it locally. If the local team is overloaded, it coordinates with the GCS to find an office with capacity.
+
+### Step 4: Execution (Worker)
+
+The worker retrieves the function code and runs it:
+
+```python
+# Worker gets the assignment
+project = raylet.next_assignment()
+
+# Loads the function from corporate registry
+function = cloudpickle.loads(gcs.get_function(project.function_id))
+
+# Executes the work
+result = function(5)  # Computes 5 * 2 = 10
+
+# Stores in file room
+file_room.put(project.project_id, result)
+
+# Reports completion
+raylet.project_completed(project.project_id)
+```
+
+The worker operates independently—gets the assignment, executes it, files the result, reports completion.
+
+### Step 5: Result Retrieval (`ray.get()`)
+
+When you call `ray.get()`, you're asking: "Where's my completed work?"
+
+```python
+# Request result from regional manager
+result_data = local_raylet.get_file(result_ref.file_id)
+
+# Raylet checks local file room
+if local_file_room.contains(file_id):
+    return local_file_room.get(file_id)
+else:
+    # File is in another office
+    remote_office = gcs.locate_file(file_id)
+    data = fetch_from(remote_office, file_id)
+    return data
+```
+
+The regional manager checks the local file room first. If the result is in another office, it fetches it through the corporate network.
+
+### The Complete Flow
+
+```
+1. Register SOP: @ray.remote decorator
+2. Submit project: process_data.remote(5)
+3. Regional manager assigns: Raylet finds available worker
+4. Worker executes: Runs x * 2, stores result
+5. File result: Goes to file room (object store)
+6. Retrieve output: ray.get() fetches from file room
+```
+
+### What You Can Monitor
+
+Watch this in action:
+
+```python
+@ray.remote
+def slow_project():
+    import time
+    time.sleep(5)
+    return "done"
+
+# Submit 10 projects
+refs = [slow_project.remote() for _ in range(10)]
+```
+
+Open `http://localhost:8265`:
+
+- See regional manager distributing work across workers
+- Watch workers execute in parallel
+- See file room filling with results
+- Track timing: who finished when?
+
+### At Mechademy
+
+This mental model saved us debugging time. When XGBoost training stalled:
+
+- Dashboard showed: Workers idle ✅
+- GCS showed: Projects pending ❌
+- **Diagnosis**: Regional manager couldn't reach executive office (network issue)
+- **Fix**: Kubernetes network policies blocking Raylet-to-GCS communication
+
+Knowing the flow—submit → assign → execute → file → retrieve—made it clear where to investigate. Each step has logs, each component has clear responsibility.
+
+---
+
+## What's Next
+
+**You Now Understand the Runtime**
+
+When you call `ray.init()`, you're not just "starting Ray." You're launching a distributed company with:
+
+- Executive coordination (GCS)
+- Regional management (Raylet)
+- Shared file storage (Object Store)
+- Execution workers
+- Operational visibility (Dashboard)
+
+**Coming Up in Part 3: Projects and Departments**
+
+Now that you know *how* the company works, we'll explore *what* it can handle:
+
+- Individual projects (tasks) vs ongoing departments (actors)
+- When to use each
+- Advanced patterns (nested projects, worker pools)
+- Real code from our Mechademy deployment
+
+**Coming Up in Part 4: Resource Management**
+
+How does Ray decide where to run your code?
+
+- Resource-aware assignment
+- Locality optimization (keep data close to computation)
+- Custom scheduling strategies
+- Scaling patterns for production
+
+**Try It Yourself**
+
+```python
+import ray
+ray.init()
+
+# Open http://localhost:8265 in your browser
+
+@ray.remote
+def debug_task():
+    import time
+    import socket
+    time.sleep(3)
+    return f"Executed on {socket.gethostname()}"
+
+# Launch 5 projects and watch the dashboard
+refs = [debug_task.remote() for _ in range(5)]
+results = ray.get(refs)
+print(results)
+```
+
+Watch how:
+
+- Regional manager distributes work across available workers
+- Workers execute in parallel
+- File room fills with results
+- Dashboard shows real-time progress
+
+Understanding the runtime isn't academic—it's practical. When something breaks in production (and it will), you'll know exactly where to look: executive office connectivity, regional manager logs, worker capacity, file room pressure.
+
+**Next time:** We'll dive into the programming model—tasks, actors, and the patterns that make distributed ML seamless. You'll understand not just *how* Ray runs code, but *when* to use each execution pattern.
+
+See you in Part 3.
