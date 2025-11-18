@@ -7,6 +7,7 @@ import TableOfContents from '@/components/blog/TableOfContents';
 import { Clock, Calendar, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import rehypePrettyCode from 'rehype-pretty-code';
 import 'katex/dist/katex.min.css';
@@ -148,7 +149,7 @@ export default async function PostPage({ params }) {
                 source={content}
                 options={{
                   mdxOptions: {
-                    remarkPlugins: [remarkMath],
+                    remarkPlugins: [remarkMath, remarkGfm],
                     rehypePlugins: [
                       rehypeKatex,
                       [

@@ -1,6 +1,6 @@
 ---
 title: "Inside Ray: What Happens When You Hit Start"
-date: "2025-11-16"
+date: "2025-11-18"
 description: "Ray isn't just an API—it's a distributed company with executives, managers, and workers. Learn the runtime components (GCS, raylet, object store) and practical debugging steps for Kubernetes-based Ray clusters."
 category: "Distributed Systems"
 tags: ["Ray", "Distributed Computing", "Python", "ML Infrastructure", "Architecture", "Debugging"]
@@ -16,7 +16,8 @@ Our Ray cluster was running. The dashboard loaded. Every node showed green.
 
 And yet—our training jobs just sat there. Pending. Forever.
 
-Here's what I learned that day: Ray isn't just an API that "makes Python distributed." It's more like a company—with executives tracking operations, managers coordinating work, employees executing tasks, and a shared file room where everyone stores completed work.
+Here's what I learned that day: Ray isn't just an API that "makes Python distributed." We'll use a companies analogy to understand how ray works internally. So buckle up! 
+Ray is like a company—with executives tracking operations, managers coordinating work, employees executing tasks, and a shared file room where everyone stores completed work.
 
 Understanding that structure—who does what, how they communicate—turned debugging from guesswork into detective work.
 
@@ -34,7 +35,7 @@ That's when `ray.init()` stopped being an API call and became a survival skill. 
 
 So I started reading Ray's startup path in the source code. What emerged was surprisingly elegant: a small set of cooperating processes that, once mapped, explain almost every "cluster is up but tasks won't run" scenario.
 
-Our breakthrough came when we stopped treating `ray.init()` as magic and began asking concrete questions:
+The breakthrough came when I stopped treating `ray.init()` as magic and began asking concrete questions:
 
 - Is the GCS process running and can workers reach it?
 - Are raylet processes registering and spawning workers?
@@ -93,16 +94,16 @@ Within seconds, Ray spins up a complete distributed system on a single machine. 
 
 This is perfect for development. You can test distributed code without deploying infrastructure. When something breaks, all the logs are on your machine. No remote access needed, no network debugging.
 
-At Mechademy, every engineer runs Ray locally first. We prototype training pipelines on laptop-sized data, verify the logic works, then deploy to AWS. Local mode catches 90% of bugs before they touch production.
+So when starting off, I would implore every engineer to run Ray locally first. Prototype training pipelines on laptop-sized data, verify the logic works, then deploy to cloud/clusters/wherever. Local mode helps catch 90% of bugs before they touch production.
 
 ### Cluster Mode: The Enterprise
 
 Production is different. You don't want computation on your laptop—you want a cluster of powerful machines working together.
 
-At Mechademy, we deploy Ray clusters to AWS using Kubernetes. Our orchestration platform manages the infrastructure—launching head and worker pods, configuring networking, mounting storage. Once the cluster is running, our platform connects to it:
+At Mechademy, we deploy Ray clusters to AWS using Kubernetes. Our orchestration platform manages the infrastructure—launching head and worker pods, configuring networking, mounting storage. Once the cluster is running, we connect to it:
 
 ```python
-# Our ML platform submits jobs to the cluster
+# We submit jobs to the cluster
 ray.init(address="ray://<cluster-service>:10001")
 ```
 
@@ -127,12 +128,13 @@ One parameter changes everything. `address=None` means "I'm the company." `addre
 
 ### When to Use Each
 
+
 | Scenario | Mode | Why |
 |----------|------|-----|
 | Writing new code | Local | Fast iteration, easy debugging |
 | Running tests | Local | Reproducible, no infrastructure needed |
 | Production training | Cluster | Scale to real data and compute |
-| Platform-managed workflows | Cluster | Central job orchestration |
+| Managed workflows | Cluster | Central job orchestration |
 
 ### Why This Matters for Debugging
 
@@ -214,6 +216,8 @@ The object store allocates local shared memory (commonly from `/dev/shm` on Linu
 
 Multiple workers on the same node can access the same files without making copies—they just read from the shared cabinet. This zero-copy sharing is why Ray is fast for large data.
 
+FYI, this is one my favorite things of ray and we will deep dive into it a lot more in a later post.
+
 **Step 5: Onboarding Workers**
 
 The Raylet spawns several worker processes upfront—your employees ready to execute work. Workers start idle, waiting for assignments from the regional manager.
@@ -293,7 +297,10 @@ The [GCS (Global Control Store)](https://docs.ray.io/en/latest/ray-core/scheduli
 3. **Files**: Where work outputs are stored (objects)
 4. **Resources**: Who has CPUs, GPUs, memory available
 
-When a regional manager needs to know "where is file abc123?" they check with the executive office. The GCS is the shared information system—not a command center.
+When a regional manager needs to know "where is file abc123?" they check with the executive office. 
+
+So GCS is not micromanaging, but it is still a cluster coordinator.
+Not a dictator—more like a central HR & record system used by managers.
 
 ### The Regional Manager (Raylet)
 
@@ -308,17 +315,26 @@ The Raylet doesn't make company-wide decisions—it manages local resources and 
 
 ### The File Room (Object Store)
 
-The object store is shared memory—like a shared network drive where work outputs live temporarily.
+The object store is a shared-memory region on each node — a fast, local “filing cabinet” where task results are stored.
 
-**Why shared memory?** Performance. When Project A produces a result that Project B needs:
+**Why shared memory?** Performance.
+When two tasks run on the same node:
+	1.	Task A writes its output into the local object store (shared memory)
+	2.	Task B reads the output directly from that shared memory
+	3.	Zero-copy, zero-serialization inside the node
 
-1. Project A stores result in file room (shared memory)
-2. Project B reads directly from the same location
-3. Zero copying, zero transfer overhead
+This is why Ray can pass large arrays, DataFrames, or model outputs between workers efficiently.
 
-This zero-copy sharing is like putting completed work in a shared cabinet—anyone can access it without making duplicates.
+**Important**:
+Each node has its own object store. There is no cluster-wide shared memory.
 
-**Important**: Each node has its own object store. When a task on one node needs data from another, Ray's ObjectManager coordinates the transfer between their file rooms.
+When a task on Node A needs data stored on Node B:
+	1.	The ObjectManager asks GCS where the object lives
+	2.	Performs a network transfer from Node B’s object store
+	3.	Materializes it in Node A’s object store
+
+So within a node: zero-copy
+Across nodes: serialized network transfer
 
 ### The Workers
 
@@ -432,34 +448,6 @@ The regional manager checks the local file room first. If the result is in anoth
 6. Retrieve: ray.get() fetches from file room
 ```
 
-### What You Can Monitor
-
-Watch this in action:
-
-```python
-@ray.remote
-def slow_project():
-    import time
-    time.sleep(5)
-    return "done"
-
-refs = [slow_project.remote() for _ in range(10)]
-```
-
-Open `http://localhost:8265`:
-
-- See regional manager distributing work across workers
-- Watch workers execute in parallel
-- Track timing: who finished when?
-
-### At Mechademy
-
-This mental model saved us debugging time. When training stalled:
-
-- Dashboard: Workers idle ✅
-- GCS: Projects pending ❌
-- **Diagnosis**: Regional manager couldn't reach executive office (network issue)
-
 Knowing the flow—submit → assign → execute → file → retrieve—made it clear where to investigate. Each step has logs, each component has clear responsibility.
 
 ---
@@ -482,15 +470,7 @@ Now that you know *how* the company works, we'll explore *what* it can handle:
 
 - Individual projects (tasks) vs ongoing departments (actors)
 - When to use each
-- Advanced patterns from our Mechademy deployment
-
-**Coming Up in Part 4: Resource Management**
-
-How does Ray decide where to run your code?
-
-- Resource-aware assignment
-- Locality optimization (keep data close to computation)
-- Custom scheduling strategies
+- Advanced patterns 
 
 **Try It Yourself**
 
@@ -514,7 +494,5 @@ print(results)
 Watch how the regional manager distributes work, workers execute in parallel, and the dashboard shows real-time progress.
 
 Understanding the runtime isn't academic—it's practical. When something breaks in production, you'll know exactly where to look: executive office connectivity, regional manager logs, worker capacity, file room pressure.
-
-**Next time:** We'll dive into the programming model—tasks, actors, and the patterns that make distributed ML seamless.
 
 See you in Part 3.
