@@ -38,6 +38,38 @@ module.exports = {
             'code::after': {
               content: '""',
             },
+            // Table styles
+            table: {
+              width: '100%',
+              marginTop: '2rem',
+              marginBottom: '2rem',
+              borderCollapse: 'collapse',
+              fontSize: '0.875rem',
+            },
+            thead: {
+              borderBottomWidth: '1px',
+              borderBottomColor: theme('colors.gray.300'),
+            },
+            'thead th': {
+              verticalAlign: 'bottom',
+              paddingTop: '0.75rem',
+              paddingBottom: '0.75rem',
+              paddingLeft: '0.75rem',
+              paddingRight: '0.75rem',
+              textAlign: 'left',
+              fontWeight: '600',
+            },
+            'tbody tr': {
+              borderBottomWidth: '1px',
+              borderBottomColor: theme('colors.gray.200'),
+            },
+            'tbody td': {
+              verticalAlign: 'top',
+              paddingTop: '0.75rem',
+              paddingBottom: '0.75rem',
+              paddingLeft: '0.75rem',
+              paddingRight: '0.75rem',
+            },
           },
         },
         invert: {
@@ -62,6 +94,22 @@ module.exports = {
             blockquote: {
               borderLeftColor: theme('colors.blue.500'),
               color: theme('colors.gray.400'),
+            },
+            // Dark mode table styles
+            table: {
+              borderColor: theme('colors.gray.600'),
+            },
+            thead: {
+              borderBottomColor: theme('colors.gray.600'),
+            },
+            'thead th': {
+              color: theme('colors.gray.200'),
+            },
+            'tbody tr': {
+              borderBottomColor: theme('colors.gray.700'),
+            },
+            'tbody td': {
+              color: theme('colors.gray.300'),
             },
           },
         },

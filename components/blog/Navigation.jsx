@@ -16,18 +16,43 @@ export default function Navigation({ posts = [] }) {
     { name: 'About', href: '/about' },
   ];
 
-  // Global keyboard shortcut (Cmd/Ctrl + K)
+  // Global keyboard shortcut (Cmd/Ctrl + K) and mobile menu management
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen(true);
       }
+      // Close mobile menu on Escape
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    const handleClickOutside = (e) => {
+      // Close mobile menu when clicking outside
+      if (mobileMenuOpen && !e.target.closest('nav')) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    const handleScroll = () => {
+      // Close mobile menu when scrolling
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    document.addEventListener('click', handleClickOutside);
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <>
@@ -86,19 +111,13 @@ export default function Navigation({ posts = [] }) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div
-            className="md:hidden border-t border-white/20"
-            style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(20px)',
-            }}
-          >
+          <div className="md:hidden glass border-t border-white/20 dark:border-slate-700/50">
             <div className="px-6 py-4 space-y-3">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2"
+                  className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.name}
@@ -109,7 +128,7 @@ export default function Navigation({ posts = [] }) {
                   setSearchOpen(true);
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2"
+                className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium py-2 transition-colors"
               >
                 <Search className="w-4 h-4" />
                 Search
