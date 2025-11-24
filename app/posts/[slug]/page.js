@@ -74,6 +74,7 @@ export default async function PostPage({ params }) {
                 fill
                 className="object-cover"
                 priority
+                fetchPriority="high"
                 quality={85}
                 sizes="(max-width: 768px) 100vw, 896px"
               />
