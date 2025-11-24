@@ -4,18 +4,29 @@ import Navigation from '@/components/blog/Navigation';
 import Footer from '@/components/blog/Footer';
 import ReadingProgress from '@/components/blog/ReadingProgress';
 import TableOfContents from '@/components/blog/TableOfContents';
+import MDXImage from '@/components/blog/MDXImage';
 import { Clock, Calendar, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import rehypePrettyCode from 'rehype-pretty-code';
 import 'katex/dist/katex.min.css';
 
+// Custom components for MDX
+const components = {
+  img: MDXImage,
+};
+
 // Generate static params for all posts
 export async function generateStaticParams() {
   const slugs = getAllPostSlugs();
-  return slugs.map((slug) => ({
+  
+  // Filter out any invalid slugs
+  const validSlugs = slugs.filter(slug => slug && slug !== 'undefined' && slug.trim() !== '');
+  
+  return validSlugs.map((slug) => ({
     slug: slug,
   }));
 }
@@ -38,6 +49,21 @@ export async function generateMetadata({ params }) {
 
 export default async function PostPage({ params }) {
   const { slug } = await params;
+  
+  // Validate slug
+  if (!slug || slug === 'undefined' || slug.trim() === '') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Invalid Post</h1>
+          <Link href="/" className="text-blue-600 hover:underline">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  
   const { frontmatter, content } = getPostBySlug(slug);
   const allPosts = getAllPosts(); // For search
 
@@ -58,13 +84,18 @@ export default async function PostPage({ params }) {
             <span>Back to Home</span>
           </Link>
 
-          {/* Hero Image */}
+          {/* Hero Image - OPTIMIZED WITH NEXT.JS IMAGE */}
           {frontmatter.image && (
-            <div className="glass-card rounded-2xl overflow-hidden mb-8 border border-white/20">
-              <img
+            <div className="glass-card rounded-2xl overflow-hidden mb-8 border border-white/20 relative h-96">
+              <Image
                 src={frontmatter.image}
                 alt={frontmatter.title}
-                className="w-full h-96 object-cover"
+                fill
+                className="object-cover"
+                priority
+                fetchPriority="high"
+                quality={85}
+                sizes="(max-width: 768px) 100vw, 896px"
               />
             </div>
           )}
@@ -129,7 +160,7 @@ export default async function PostPage({ params }) {
             )}
           </header>
 
-          {/* Post Content - THIS IS THE IMPORTANT PART */}
+          {/* Post Content */}
           <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/20">
             <div className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:scroll-mt-24
@@ -147,6 +178,7 @@ export default async function PostPage({ params }) {
             ">
               <MDXRemote 
                 source={content}
+                components={components}
                 options={{
                   mdxOptions: {
                     remarkPlugins: [remarkMath, remarkGfm],

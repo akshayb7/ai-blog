@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Clock } from 'lucide-react';
 
 export default function PostCard({ post }) {
@@ -6,19 +7,22 @@ export default function PostCard({ post }) {
     <Link href={`/posts/${post.slug}`}>
       <article className="glass-card rounded-2xl overflow-hidden border border-white/20 hover:scale-105 transition-transform duration-300 cursor-pointer group h-full">
         <div className="relative h-48 overflow-hidden">
-          {/* Image */}
-          <img
+          {/* Image - OPTIMIZED */}
+          <Image
             src={post.image}
             alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
           />
           
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
           
           {/* Category Badge */}
           <span
-            className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium text-white border border-white/20"
+            className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium text-white border border-white/20 z-20"
             style={{
               background: 'rgba(0, 0, 0, 0.3)',
               backdropFilter: 'blur(10px)',
