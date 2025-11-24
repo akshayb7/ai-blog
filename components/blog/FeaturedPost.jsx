@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Clock, ArrowRight } from 'lucide-react';
 
 export default function FeaturedPost({ post }) {
@@ -9,18 +10,22 @@ export default function FeaturedPost({ post }) {
       <Link href={`/posts/${post.slug}`}>
         <div className="glass-card rounded-3xl overflow-hidden border border-white/20 hover:scale-[1.02] transition-transform duration-300 cursor-pointer group">
           <div className="relative h-96 overflow-hidden">
-            {/* Image */}
-            <img
+            {/* Image - OPTIMIZED */}
+            <Image
               src={post.image}
               alt={post.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              priority
+              quality={85}
+              sizes="(max-width: 768px) 100vw, 1280px"
             />
             
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
 
             {/* Category Badge */}
-            <div className="absolute top-6 left-6">
+            <div className="absolute top-6 left-6 z-20">
               <span
                 className="px-4 py-1.5 rounded-full text-sm font-medium text-white border border-white/20"
                 style={{
@@ -33,7 +38,7 @@ export default function FeaturedPost({ post }) {
             </div>
 
             {/* Content Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
               <div className="flex items-center space-x-4 text-sm text-white/90 mb-3">
                 <span className="flex items-center space-x-1">
                   <Clock className="w-4 h-4" />
