@@ -22,7 +22,11 @@ const components = {
 // Generate static params for all posts
 export async function generateStaticParams() {
   const slugs = getAllPostSlugs();
-  return slugs.map((slug) => ({
+  
+  // Filter out any invalid slugs
+  const validSlugs = slugs.filter(slug => slug && slug !== 'undefined' && slug.trim() !== '');
+  
+  return validSlugs.map((slug) => ({
     slug: slug,
   }));
 }
@@ -45,6 +49,21 @@ export async function generateMetadata({ params }) {
 
 export default async function PostPage({ params }) {
   const { slug } = await params;
+  
+  // Validate slug
+  if (!slug || slug === 'undefined' || slug.trim() === '') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Invalid Post</h1>
+          <Link href="/" className="text-blue-600 hover:underline">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  
   const { frontmatter, content } = getPostBySlug(slug);
   const allPosts = getAllPosts(); // For search
 
