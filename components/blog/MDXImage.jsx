@@ -10,8 +10,8 @@ export default function MDXImage({ src, alt, ...props }) {
   const imageSrc = src.startsWith('http') ? src : src;
 
   return (
-    <div className="relative w-full my-8">
-      <div className={`relative w-full transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+    <span className="block relative w-full my-8">
+      <span className={`block relative w-full transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         <Image
           src={imageSrc}
           alt={alt || 'Blog post image'}
@@ -22,10 +22,10 @@ export default function MDXImage({ src, alt, ...props }) {
           onLoad={() => setIsLoading(false)}
           sizes="(max-width: 768px) 100vw, 896px"
         />
-      </div>
+      </span>
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-xl" />
+        <span className="absolute inset-0 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-xl block" />
       )}
-    </div>
+    </span>
   );
 }
