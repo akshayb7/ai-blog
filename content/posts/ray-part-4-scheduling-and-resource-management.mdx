@@ -20,7 +20,7 @@ I've seen this pattern in Ray's GitHub issues and community forums more times th
 
 But sometimes the bottleneck isn't compute. It's coordination.
 
-At Mechademy, we hit this when scaling our feature engineering pipeline. We were generating millions of small tasks—one per turbine configuration, per time window, per feature set. Each task was cheap (milliseconds of work), but there were so many of them that Ray's coordination layer started drowning.
+At Mechademy, we hit this when scaling our feature engineering pipeline. We were generating millions of small tasks—one per machine configuration, per time window, per feature set. Each task was cheap (milliseconds of work), but there were so many of them that Ray's coordination layer started drowning.
 
 The symptoms were subtle at first. Dashboard response times crept up. Task scheduling latency increased from milliseconds to seconds. Workers were available, but tasks weren't landing fast enough. We weren't compute-bound—we were *coordination-bound*.
 

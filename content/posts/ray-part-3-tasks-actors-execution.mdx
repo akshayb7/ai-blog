@@ -44,7 +44,7 @@ Wait—classes, not just functions? State that persists between calls?
 
 The office analogy clicked. Ray gives you both types of employees: **tasks** are the one-off jobs that any available worker can handle in parallel. **Actors** are the dedicated account managers who stick with a project and remember everything that's happened.
 
-At Mechademy, this distinction transformed our architecture. Actors for the training coordinators that manage long-running jobs and track state. Tasks for the parallel feature engineering across thousands of turbine configurations. Actors for artifact generators that accumulate plots throughout training. Tasks for the batch predictions that don't need memory.
+At Mechademy, this distinction transformed our architecture. Actors for the training coordinators that manage long-running jobs and track state. Tasks for the parallel feature engineering across thousands of machine configurations. Actors for artifact generators that accumulate plots throughout training. Tasks for the batch predictions that don't need memory.
 
 The real breakthrough? Actors can delegate tasks. Your training coordinator (actor) holds the context and continuity, but when it needs 100 features computed, it dispatches 100 tasks to the employee pool. The dedicated manager orchestrates; the general staff executes.
 
