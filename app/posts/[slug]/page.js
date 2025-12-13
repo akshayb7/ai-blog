@@ -5,6 +5,7 @@ import Footer from '@/components/blog/Footer';
 import ReadingProgress from '@/components/blog/ReadingProgress';
 import TableOfContents from '@/components/blog/TableOfContents';
 import MDXImage from '@/components/blog/MDXImage';
+import Comments from '@/components/blog/Comments';
 import { Clock, Calendar, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -14,18 +15,20 @@ import rehypeKatex from 'rehype-katex';
 import rehypePrettyCode from 'rehype-pretty-code';
 import 'katex/dist/katex.min.css';
 
+import { useMDXComponents } from '@/mdx-components';
+
 // Custom components for MDX
-const components = {
+const components = useMDXComponents({
   img: MDXImage,
-};
+});
 
 // Generate static params for all posts
 export async function generateStaticParams() {
   const slugs = getAllPostSlugs();
-  
+
   // Filter out any invalid slugs
   const validSlugs = slugs.filter(slug => slug && slug !== 'undefined' && slug.trim() !== '');
-  
+
   return validSlugs.map((slug) => ({
     slug: slug,
   }));
@@ -35,21 +38,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const { frontmatter } = getPostBySlug(slug);
-  
+
   return {
     title: `${frontmatter.title} | Akshay's Expedition Logs`,
     description: frontmatter.description,
     openGraph: {
       title: frontmatter.title,
       description: frontmatter.description,
-      images: [frontmatter.image],
+      // Dynamic OG Image
+      images: [`/og?title=${encodeURIComponent(frontmatter.title)}&category=${encodeURIComponent(frontmatter.category)}`],
     },
   };
 }
 
 export default async function PostPage({ params }) {
   const { slug } = await params;
-  
+
   // Validate slug
   if (!slug || slug === 'undefined' || slug.trim() === '') {
     return (
@@ -63,12 +67,32 @@ export default async function PostPage({ params }) {
       </div>
     );
   }
-  
+
   const { frontmatter, content } = getPostBySlug(slug);
   const allPosts = getAllPosts(); // For search
 
+  // JSON-LD for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: frontmatter.title,
+    description: frontmatter.description,
+    image: frontmatter.image ? `https://blog.akshayworks.com${frontmatter.image}` : undefined,
+    datePublished: new Date(frontmatter.date).toISOString(),
+    author: {
+      '@type': 'Person',
+      name: frontmatter.author || 'Akshay',
+      url: 'https://blog.akshayworks.com/about',
+    },
+    url: `https://blog.akshayworks.com/posts/${slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ReadingProgress />
       <Navigation posts={allPosts} />
       <TableOfContents />
@@ -76,7 +100,7 @@ export default async function PostPage({ params }) {
       <article className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-6">
           {/* Back Button */}
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-8 transition-colors"
           >
@@ -176,7 +200,7 @@ export default async function PostPage({ params }) {
               prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
               prose-hr:border-gray-200 dark:prose-hr:border-gray-700 prose-hr:my-8
             ">
-              <MDXRemote 
+              <MDXRemote
                 source={content}
                 components={components}
                 options={{
@@ -197,6 +221,9 @@ export default async function PostPage({ params }) {
               />
             </div>
           </div>
+
+          {/* Comments */}
+          <Comments />
 
           {/* Back to Home Button */}
           <div className="mt-12 text-center">

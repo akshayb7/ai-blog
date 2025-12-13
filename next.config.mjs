@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ['js', 'jsx', 'mdx'],
+  pageExtensions: ['js', 'jsx', 'mdx', 'ts', 'tsx'],
   images: {
     // Your existing remote patterns
     remotePatterns: [
@@ -26,7 +26,7 @@ const nextConfig = {
   // Enable compression
   compress: true,
   // Production optimizations
-  swcMinify: true,
+
   reactStrictMode: true,
   // Performance monitoring
   experimental: {

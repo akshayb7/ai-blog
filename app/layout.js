@@ -3,7 +3,7 @@ import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 import PerformanceMonitor from '@/components/blog/PerformanceMonitor';
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 });
@@ -29,7 +29,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.className}>
+    <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="antialiased">
         <PerformanceMonitor />
         <ThemeProvider>
