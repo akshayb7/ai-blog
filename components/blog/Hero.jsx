@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { Brain, Code, BookOpen, Sparkles } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+
 export default function Hero() {
   const categories = [
     { name: 'Deep Learning', icon: Brain, color: 'from-blue-500 to-cyan-500' },
@@ -20,7 +23,7 @@ export default function Hero() {
             Akshay's Expedition Logs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-            Exploring Machine Learning, Deep Learning, and Generative AI through 
+            Exploring Machine Learning, Deep Learning, and Generative AI through
             practical implementations and visual explanations
           </p>
         </div>
@@ -34,14 +37,16 @@ export default function Hero() {
               <Link
                 key={cat.name}
                 href={`/category/${categorySlug}`}
-                className="px-4 py-2 rounded-full border border-white/20 hover:scale-105 transition-transform glass-card"
               >
-                <div className="flex items-center space-x-2">
-                  <div className={`bg-gradient-to-r ${cat.color} p-1 rounded`}>
+                <Badge
+                  variant="glass"
+                  className="px-4 py-2 hover:scale-105 transition-transform cursor-pointer"
+                >
+                  <div className={`bg-gradient-to-r ${cat.color} p-1 rounded mr-2`}>
                     <Icon className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{cat.name}</span>
-                </div>
+                  {cat.name}
+                </Badge>
               </Link>
             );
           })}
