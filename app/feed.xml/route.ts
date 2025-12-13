@@ -9,7 +9,7 @@ type Post = {
 };
 
 export async function GET() {
-  const posts = getAllPosts() as Post[];
+  const posts = getAllPosts() as unknown as Post[];
   const baseUrl = 'https://blog.akshayworks.com';
 
   const rss = `<?xml version="1.0" encoding="UTF-8" ?>

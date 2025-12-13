@@ -8,7 +8,7 @@ type Post = {
 };
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const posts = getAllPosts() as Post[];
+    const posts = getAllPosts() as unknown as Post[];
     const baseUrl = 'https://blog.akshayworks.com';
 
     const postUrls = posts.map((post) => ({
