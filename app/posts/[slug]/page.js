@@ -71,8 +71,28 @@ export default async function PostPage({ params }) {
   const { frontmatter, content } = getPostBySlug(slug);
   const allPosts = getAllPosts(); // For search
 
+  // JSON-LD for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: frontmatter.title,
+    description: frontmatter.description,
+    image: frontmatter.image ? `https://blog.akshayworks.com${frontmatter.image}` : undefined,
+    datePublished: new Date(frontmatter.date).toISOString(),
+    author: {
+      '@type': 'Person',
+      name: frontmatter.author || 'Akshay',
+      url: 'https://blog.akshayworks.com/about',
+    },
+    url: `https://blog.akshayworks.com/posts/${slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ReadingProgress />
       <Navigation posts={allPosts} />
       <TableOfContents />
