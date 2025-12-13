@@ -45,7 +45,8 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: frontmatter.title,
       description: frontmatter.description,
-      images: [frontmatter.image],
+      // Dynamic OG Image
+      images: [`/og?title=${encodeURIComponent(frontmatter.title)}&category=${encodeURIComponent(frontmatter.category)}`],
     },
   };
 }
