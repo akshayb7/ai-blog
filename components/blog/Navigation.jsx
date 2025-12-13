@@ -46,7 +46,7 @@ export default function Navigation({ posts = [] }) {
     window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('click', handleClickOutside);
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('click', handleClickOutside);
@@ -57,8 +57,8 @@ export default function Navigation({ posts = [] }) {
   return (
     <>
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} posts={posts} />
-      
-      <nav className="glass fixed top-0 left-0 right-0 z-50 border-b border-white/20">
+
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:dark:bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -82,7 +82,7 @@ export default function Navigation({ posts = [] }) {
                   {link.name}
                 </Link>
               ))}
-              <button 
+              <button
                 onClick={() => setSearchOpen(true)}
                 className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 glass-card rounded-lg transition-colors"
               >
