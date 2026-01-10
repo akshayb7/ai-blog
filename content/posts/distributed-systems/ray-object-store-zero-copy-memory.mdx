@@ -5,7 +5,7 @@ description: "Deep dive into Ray's object store architecture: how shared memory 
 category: "Distributed Systems"
 tags: ["Ray", "Object Store", "Shared Memory", "Python", "ML Infrastructure", "Architecture"]
 featured: false
-image: "/images/ray-architecture-part5.jpg"
+image: "/images/ray-architecture-part5.png"
 series: "Ray Architecture Deep Dive"
 seriesPart: 5
 ---
@@ -243,7 +243,7 @@ del arr_ref  # Now Ray can reclaim this memory if needed
 
 When the object store fills up:
 
-1. **Eviction**: Ray removes unpinned objects (LRU policy). If you access an evicted object later, Ray can reconstruct it by re-running the task that produced it—but you pay the compute cost again.
+1. **Eviction**: Ray removes unpinned objects (LRU policy). If you access an evicted object later, Ray may reconstruct evicted objects by re-executing their lineage, but this is not guaranteed. In production pipelines, assume evicted objects are gone unless you explicitly spill to disk or persist results externally.
 
 2. **Spilling**: Ray can write objects to disk instead of evicting them. Slower than memory, but faster than reconstruction.
 
