@@ -83,7 +83,7 @@ The object store isn't one giant pool of shared memory across your cluster. That
 
 Instead, Ray creates a separate object store on *each node*. When you start Ray on a machine, one of the processes that launches is the Plasma store—a local shared memory region carved out from `/dev/shm` on Linux (or `/tmp` on macOS).
 
-Think back to the office analogy from Part 2. The object store is the file room in each regional office. Workers in that office can access files instantly—it's just shared memory. But workers in another office? They need the data transferred first.
+Think back to the office analogy from [Part 2](/posts/ray-runtime-init-to-first-task). The object store is the file room in each regional office. Workers in that office can access files instantly—it's just shared memory. But workers in another office? They need the data transferred first.
 
 ### Where Do Objects Actually Live?
 

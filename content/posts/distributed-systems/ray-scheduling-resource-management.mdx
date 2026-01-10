@@ -42,13 +42,13 @@ That moment taught me something fundamental about distributed scheduling: it's n
 
 This is what Part 4 is about. Not just "Ray finds an available worker and runs your task there"—but the intelligence behind those decisions. How does Ray know which node has the right resources? When does it optimize for data locality versus load balancing? How do you control placement when you need specific hardware? And critically—how do you tune the system when coordination itself becomes the bottleneck?
 
-If Part 2 showed you the components and Part 3 showed you the execution models, Part 4 is about the brain that ties it together: the scheduler that decides where everything runs, and how to make it work at scale.
+If [Part 2](/posts/ray-runtime-init-to-first-task) showed you the components and [Part 3](/posts/ray-tasks-actors-execution-model) showed you the execution models, Part 4 is about the brain that ties it together: the scheduler that decides where everything runs, and how to make it work at scale.
 
 Let's start with the basics: when you call `task.remote()`, how does Ray decide where it runs?
 
 ## The Basics: How Ray Decides Where
 
-When you call `task.remote()`, Ray doesn't just pick a random worker and ship your code there. There's a multi-step dance between the components you met in Part 2—your local Raylet, the GCS, and remote Raylets.
+When you call `task.remote()`, Ray doesn't just pick a random worker and ship your code there. There's a multi-step dance between the components you met in [Part 2](/posts/ray-runtime-init-to-first-task)—your local Raylet, the GCS, and remote Raylets.
 
 Let's watch what happens with a simple example:
 
