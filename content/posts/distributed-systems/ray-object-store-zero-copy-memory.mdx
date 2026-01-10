@@ -1,5 +1,5 @@
 ---
-title: "Ray Architecture Deep Dive - Part 5: The Object Store"
+title: "Shared Memory, Zero-Copy, and the Object Store"
 date: "2026-01-10"
 description: "Deep dive into Ray's object store architecture: how shared memory enables zero-copy transfers, plasma store implementation, and patterns for efficient distributed data handling."
 category: "Distributed Systems"
@@ -9,10 +9,6 @@ image: "/images/ray-architecture-part5.png"
 series: "Ray Architecture Deep Dive"
 seriesPart: 5
 ---
-
-# Ray Architecture Deep Dive - Part 5: The Object Store
-
-## Section 1: Hook - Building for Scale
 
 Here's a question that doesn't get asked enough: how does Ray pass a 10GB NumPy array between tasks without grinding to a halt?
 
@@ -77,7 +73,7 @@ But only if you use it correctly: store once with `ray.put()`, reference everywh
 
 This is what Part 5 is about—not just *what* the object store is, but *how* it works and *why* understanding that architecture matters when you're building systems at scale.
 
-## Section 2: The Architecture - Per-Node Shared Memory
+## Per-Node Shared Memory
 
 The object store isn't one giant pool of shared memory across your cluster. That's the first misconception to clear up.
 
@@ -140,7 +136,7 @@ data_ref = load_data_on_worker.remote()
 
 At Mechademy, this clicked when we restructured our feature engineering pipeline. Instead of loading data on the driver and shipping it everywhere, we created loader tasks that ran on each worker node. Data-heavy loading stayed local. Only the smaller feature vectors moved across the network.
 
-## Section 3: Zero-Copy Reads and Immutability
+## Zero-Copy Reads and Immutability
 
 Here's where the object store gets clever.
 
@@ -222,7 +218,7 @@ values_ref = ray.put(df.values)  # The underlying array gets zero-copy
 
 The rule of thumb: **structure your hot path data as NumPy arrays**. That's where zero-copy shines.
 
-## Section 4: Memory Management - When Things Get Tight
+## Memory Management
 
 The object store has a fixed size—by default, about 30% of your system's RAM. What happens when you try to put more data in than fits?
 
@@ -274,7 +270,7 @@ How much do you need? Enough for one "stage" of your pipeline's intermediate dat
 
 **Spilling thrashing**: Constantly spilling and restoring the same objects. Fix: increase object store size or restructure your pipeline for a smaller working set.
 
-## Section 5: Object Transfers Between Nodes
+## Object Transfers Between Nodes
 
 What happens when a task on Node B needs data that lives on Node A?
 
@@ -308,7 +304,7 @@ For very large objects, transfer time can dominate. A 10GB array over a 10Gbps n
 
 This is why locality matters. The best transfer is no transfer at all.
 
-## Section 6: Practical Patterns
+## Practical Patterns
 
 Three patterns that matter most in production:
 
