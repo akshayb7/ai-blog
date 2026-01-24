@@ -8,10 +8,10 @@ import { Card } from '@/components/ui/card';
 
 export default function Hero() {
   const categories = [
-    { name: 'Deep Learning', icon: Brain, color: 'from-blue-500 to-cyan-500' },
-    { name: 'GenAI', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
-    { name: 'ML Engineering', icon: Code, color: 'from-green-500 to-emerald-500' },
-    { name: 'Data Science', icon: BookOpen, color: 'from-orange-500 to-red-500' },
+    { name: 'Deep Learning', icon: Brain, color: 'from-violet-500 to-purple-600' },
+    { name: 'GenAI', icon: Sparkles, color: 'from-amber-500 to-orange-600' },
+    { name: 'ML Engineering', icon: Code, color: 'from-emerald-500 to-teal-600' },
+    { name: 'Data Science', icon: BookOpen, color: 'from-rose-500 to-pink-600' },
   ];
 
   return (
@@ -19,12 +19,12 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto">
         {/* Main Heading */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 dark:from-gray-100 dark:via-blue-300 dark:to-cyan-300 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-amber-800 to-orange-900 dark:from-gray-100 dark:via-amber-300 dark:to-orange-300 bg-clip-text text-transparent leading-tight">
             Akshay's Expedition Logs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-            Exploring Machine Learning, Deep Learning, and Generative AI through
-            practical implementations and visual explanations
+            Deep dives into distributed systems, ML infrastructure, and the architectures
+            that make AI at scale actually work
           </p>
         </div>
 
