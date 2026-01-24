@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { Copy, Check, Terminal } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default function CodeBlock({ children, className, ...props }) {
     const [copied, setCopied] = useState(false);
@@ -39,17 +37,15 @@ export default function CodeBlock({ children, className, ...props }) {
     };
 
     return (
-        <Card className="my-6 overflow-hidden border-white/10 dark:bg-slate-900/50 bg-slate-50/50">
-            <div className="flex items-center justify-between px-4 py-2 bg-slate-100/50 dark:bg-slate-800/50 border-b border-white/10">
-                <div className="flex items-center space-x-2 text-xs text-muted-foreground font-mono">
+        <div className="my-6 overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-lg">
+            <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+                <div className="flex items-center space-x-2 text-xs text-slate-400 font-mono">
                     <Terminal className="w-3.5 h-3.5" />
                     <span>{language}</span>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 hover:bg-white/10"
+                <button
                     onClick={copyToClipboard}
+                    className="h-7 w-7 p-0 flex items-center justify-center rounded hover:bg-slate-700 text-slate-400 transition-colors"
                 >
                     {copied ? (
                         <Check className="w-3.5 h-3.5 text-green-500" />
@@ -57,13 +53,13 @@ export default function CodeBlock({ children, className, ...props }) {
                         <Copy className="w-3.5 h-3.5" />
                     )}
                     <span className="sr-only">Copy code</span>
-                </Button>
+                </button>
             </div>
-            <div className="p-0 overflow-x-auto text-sm">
-                <pre className={`${className} !m-0 !p-4 !bg-transparent`}>
+            <div className="p-0 overflow-x-auto text-sm bg-slate-900">
+                <pre className={`${className} !m-0 !p-4 !bg-slate-900`}>
                     {children}
                 </pre>
             </div>
-        </Card>
+        </div>
     );
 }
