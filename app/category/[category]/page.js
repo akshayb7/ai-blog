@@ -42,7 +42,7 @@ export default async function CategoryPage({ params }) {
   const allPosts = getAllPosts(); // For search
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-orange-50/20 dark:from-slate-950 dark:via-amber-950/20 dark:to-slate-900">
       <Navigation posts={allPosts} />
 
       <main className="pt-24 pb-20">

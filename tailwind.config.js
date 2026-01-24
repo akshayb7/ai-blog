@@ -14,9 +14,9 @@ module.exports = {
             maxWidth: 'none',
             color: theme('colors.gray.700'),
             a: {
-              color: theme('colors.blue.600'),
+              color: theme('colors.amber.600'),
               '&:hover': {
-                color: theme('colors.blue.700'),
+                color: theme('colors.amber.700'),
               },
               textDecoration: 'none',
               fontWeight: '500',
@@ -76,9 +76,9 @@ module.exports = {
           css: {
             color: theme('colors.gray.300'),
             a: {
-              color: theme('colors.blue.400'),
+              color: theme('colors.amber.400'),
               '&:hover': {
-                color: theme('colors.blue.300'),
+                color: theme('colors.amber.300'),
               },
             },
             'h1, h2, h3, h4': {
@@ -92,7 +92,7 @@ module.exports = {
               backgroundColor: 'rgba(219, 39, 119, 0.1)',
             },
             blockquote: {
-              borderLeftColor: theme('colors.blue.500'),
+              borderLeftColor: theme('colors.amber.500'),
               color: theme('colors.gray.400'),
             },
             // Dark mode table styles

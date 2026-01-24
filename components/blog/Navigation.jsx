@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Compass, Search } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
+import { StrawHat } from '@/components/ui/straw-hat';
 import SearchModal from './SearchModal';
 
 export default function Navigation({ posts = [] }) {
@@ -63,8 +64,8 @@ export default function Navigation({ posts = [] }) {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Compass className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <StrawHat className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
                 Expedition Logs
