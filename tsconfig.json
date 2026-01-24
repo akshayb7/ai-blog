@@ -39,6 +39,11 @@
     "**/*.jsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "vitest.config.mts",
+    "vitest.setup.tsx",
+    "playwright.config.ts",
+    "__tests__",
+    "e2e"
   ]
 }
