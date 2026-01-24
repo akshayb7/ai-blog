@@ -60,7 +60,7 @@ export default async function PostPage({ params }) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Invalid Post</h1>
-          <Link href="/" className="text-blue-600 hover:underline">
+          <Link href="/" className="text-amber-600 hover:underline">
             Back to Home
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default async function PostPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/20 to-orange-50/20 dark:from-slate-950 dark:via-amber-950/20 dark:to-slate-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -196,7 +196,7 @@ export default async function PostPage({ params }) {
               prose-pre:bg-slate-900 dark:prose-pre:bg-slate-950 prose-pre:rounded-xl prose-pre:p-6 prose-pre:border prose-pre:border-slate-700
               prose-ul:my-6 prose-ol:my-6
               prose-li:my-2
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-950/30 prose-blockquote:py-2 prose-blockquote:my-6
+              prose-blockquote:border-l-4 prose-blockquote:border-amber-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:bg-amber-50/50 dark:prose-blockquote:bg-amber-950/30 prose-blockquote:py-2 prose-blockquote:my-6
               prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
               prose-hr:border-gray-200 dark:prose-hr:border-gray-700 prose-hr:my-8
             ">
@@ -229,7 +229,7 @@ export default async function PostPage({ params }) {
           <div className="mt-12 text-center">
             <Link
               href="/"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium rounded-xl hover:shadow-lg transition-shadow"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-shadow"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Home</span>
