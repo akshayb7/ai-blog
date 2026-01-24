@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Compass, Github, Linkedin, Globe, Mail } from 'lucide-react';
+import { Github, Linkedin, Globe, Mail } from 'lucide-react';
+import { StrawHat } from '@/components/ui/straw-hat';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,14 +12,17 @@ export default function Footer() {
           {/* About */}
           <div className="md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                <Compass className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                <StrawHat className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Expedition Logs</span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              Exploring the frontiers of artificial intelligence through practical 
-              implementations, visual explanations, and hands-on tutorials.
+              Deep dives into distributed systems, ML engineering, and AI infrastructure.
+              Written between debugging sessions and adventures.
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-3 italic">
+              Currently into: One Piece, techno sets, and distributed systems
             </p>
           </div>
 
@@ -83,7 +87,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-white/20 pt-8 text-center text-gray-600 dark:text-gray-400 text-sm">
-          <p>© {currentYear} Akshay's Expedition Logs. Built with Next.js, MDX, and ❤️</p>
+          <p>© {currentYear} Akshay's Expedition Logs. Charting new territories in AI.</p>
         </div>
       </div>
     </footer>
