@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, Clock, ArrowRight } from 'lucide-react';
 import { useSearch } from '@/hooks/useSearch';
@@ -9,6 +9,12 @@ export default function SearchModal({ isOpen, onClose, posts }) {
   const router = useRouter();
   const { query, setQuery, results } = useSearch(posts);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const handleSelectPost = useCallback((post) => {
+    router.push(`/posts/${post.slug}`);
+    onClose();
+    setQuery('');
+  }, [router, onClose, setQuery]);
 
   // Reset selection when results change
   useEffect(() => {
@@ -24,7 +30,7 @@ export default function SearchModal({ isOpen, onClose, posts }) {
         onClose();
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((prev) => 
+        setSelectedIndex((prev) =>
           prev < results.length - 1 ? prev + 1 : prev
         );
       } else if (e.key === 'ArrowUp') {
@@ -38,7 +44,7 @@ export default function SearchModal({ isOpen, onClose, posts }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex, onClose]);
+  }, [isOpen, results, selectedIndex, onClose, handleSelectPost]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -51,12 +57,6 @@ export default function SearchModal({ isOpen, onClose, posts }) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
-
-  const handleSelectPost = (post) => {
-    router.push(`/posts/${post.slug}`);
-    onClose();
-    setQuery('');
-  };
 
   if (!isOpen) return null;
 

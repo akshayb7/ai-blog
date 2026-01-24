@@ -15,10 +15,10 @@ import rehypeKatex from 'rehype-katex';
 import rehypePrettyCode from 'rehype-pretty-code';
 import 'katex/dist/katex.min.css';
 
-import { useMDXComponents } from '@/mdx-components';
+import { getMDXComponents as createMDXComponents } from '@/mdx-components';
 
 // Custom components for MDX
-const components = useMDXComponents({
+const components = createMDXComponents({
   img: MDXImage,
 });
 

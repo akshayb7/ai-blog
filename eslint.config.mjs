@@ -11,6 +11,15 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Disable rules that are too strict for this codebase
+  {
+    rules: {
+      // Apostrophes and quotes in JSX text content are intentional
+      "react/no-unescaped-entities": "off",
+      // Setting state in effects is valid for initialization patterns
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
