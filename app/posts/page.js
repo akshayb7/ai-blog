@@ -23,7 +23,7 @@ export default function PostsPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 mb-6">
               <BookOpen className="w-8 h-8 text-amber-600 dark:text-amber-400" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <h1 className="font-heading text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               All Posts
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">

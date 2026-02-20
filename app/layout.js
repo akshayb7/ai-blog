@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
 import PerformanceMonitor from '@/components/blog/PerformanceMonitor';
@@ -6,6 +6,13 @@ import PerformanceMonitor from '@/components/blog/PerformanceMonitor';
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
+  variable: '--font-inter',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-heading',
 });
 
 export const metadata = {
@@ -29,7 +36,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${inter.className}`} suppressHydrationWarning>
       <body className="antialiased">
         <PerformanceMonitor />
         <ThemeProvider>

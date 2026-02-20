@@ -8,6 +8,10 @@ module.exports = {
   darkMode: 'class', // Enable dark mode with class strategy
   theme: {
     extend: {
+      fontFamily: {
+        heading: ['var(--font-heading)', 'sans-serif'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+      },
       typography: (theme) => ({
         DEFAULT: {
           css: {
@@ -22,6 +26,7 @@ module.exports = {
               fontWeight: '500',
             },
             'h1, h2, h3, h4': {
+              fontFamily: 'var(--font-heading), sans-serif',
               fontWeight: '700',
               color: theme('colors.gray.900'),
             },

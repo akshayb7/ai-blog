@@ -5,7 +5,7 @@ import { Clock, ArrowRight } from 'lucide-react';
 export default function FeaturedPost({ post }) {
   return (
     <div className="mb-20">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Featured</h2>
+      <h2 className="font-heading text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Featured</h2>
       
       <Link href={`/posts/${post.slug}`}>
         <div className="rounded-3xl overflow-hidden border border-gray-200/80 dark:border-slate-700/60 hover:border-amber-300/60 dark:hover:border-amber-600/30 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-200 cursor-pointer group bg-white dark:bg-slate-900">
@@ -48,7 +48,7 @@ export default function FeaturedPost({ post }) {
                 <span>{post.date}</span>
               </div>
               
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              <h3 className="font-heading text-3xl md:text-4xl font-bold text-white mb-3">
                 {post.title}
               </h3>
               

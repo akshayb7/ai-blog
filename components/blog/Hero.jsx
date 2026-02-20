@@ -19,7 +19,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto">
         {/* Main Heading */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-amber-800 to-orange-900 dark:from-gray-100 dark:via-amber-300 dark:to-orange-300 bg-clip-text text-transparent leading-tight">
+          <h1 className="font-heading text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-amber-800 to-orange-900 dark:from-gray-100 dark:via-amber-300 dark:to-orange-300 bg-clip-text text-transparent leading-tight">
             Akshay's Expedition Logs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">

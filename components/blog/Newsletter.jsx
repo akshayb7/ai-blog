@@ -19,7 +19,7 @@ export default function Newsletter() {
   return (
     <Card className="rounded-3xl border-gray-200/80 dark:border-slate-800 !bg-white dark:!bg-slate-900 !backdrop-blur-none shadow-sm">
       <CardHeader className="text-center md:pb-2">
-        <CardTitle className="text-3xl font-bold mb-2">Stay Updated</CardTitle>
+        <CardTitle className="font-heading text-3xl font-bold mb-2">Stay Updated</CardTitle>
         <CardDescription className="text-base max-w-2xl mx-auto">
           Get notified when I finish another deep dive. No spam, I promise.
         </CardDescription>

@@ -134,7 +134,7 @@ export default async function PostPage({ params }) {
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
+            <h1 className="font-heading text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
               {frontmatter.title}
             </h1>
 

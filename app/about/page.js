@@ -25,7 +25,7 @@ export default function AboutPage() {
             <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20 dark:shadow-amber-500/10">
               <StrawHat className="w-12 h-12 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <h1 className="font-heading text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               About the Captain
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
