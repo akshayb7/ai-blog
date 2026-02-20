@@ -6,6 +6,7 @@ import ReadingProgress from '@/components/blog/ReadingProgress';
 import TableOfContents from '@/components/blog/TableOfContents';
 import MDXImage from '@/components/blog/MDXImage';
 import Comments from '@/components/blog/Comments';
+import AuthorCard from '@/components/blog/AuthorCard';
 import { Clock, Calendar, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -221,6 +222,9 @@ export default async function PostPage({ params }) {
               />
             </div>
           </div>
+
+          {/* Author Card */}
+          <AuthorCard />
 
           {/* Comments */}
           <Comments />
