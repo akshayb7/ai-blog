@@ -8,7 +8,7 @@ export default function FeaturedPost({ post }) {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Featured</h2>
       
       <Link href={`/posts/${post.slug}`}>
-        <div className="glass-card rounded-3xl overflow-hidden border border-white/20 hover:scale-[1.02] transition-transform duration-300 cursor-pointer group">
+        <div className="rounded-3xl overflow-hidden border border-gray-200/80 dark:border-slate-700/60 hover:border-amber-300/60 dark:hover:border-amber-600/30 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-200 cursor-pointer group bg-white dark:bg-slate-900">
           <div className="relative h-96 overflow-hidden">
             {/* Image - OPTIMIZED */}
             <Image

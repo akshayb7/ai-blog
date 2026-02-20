@@ -17,7 +17,7 @@ export default function Newsletter() {
   };
 
   return (
-    <Card className="rounded-3xl border-white/20">
+    <Card className="rounded-3xl border-gray-200/80 dark:border-slate-800 !bg-white dark:!bg-slate-900 !backdrop-blur-none shadow-sm">
       <CardHeader className="text-center md:pb-2">
         <CardTitle className="text-3xl font-bold mb-2">Stay Updated</CardTitle>
         <CardDescription className="text-base max-w-2xl mx-auto">
@@ -33,7 +33,7 @@ export default function Newsletter() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="flex-1 px-4 py-3 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500 glass-card bg-transparent"
+            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-gray-50 dark:bg-slate-800"
           />
           <Button
             type="submit"

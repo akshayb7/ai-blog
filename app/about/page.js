@@ -34,7 +34,7 @@ export default function AboutPage() {
           </div>
 
           {/* Main Content */}
-          <Card className="mb-8 border-white/20">
+          <Card className="mb-8 border-gray-200/80 dark:border-slate-800 !bg-white dark:!bg-slate-900 !backdrop-blur-none shadow-sm">
             <CardContent className="p-8 md:p-12">
               <div className="prose prose-lg max-w-none
                 prose-headings:text-gray-900 dark:prose-headings:text-gray-100
@@ -82,7 +82,7 @@ export default function AboutPage() {
           </Card>
 
           {/* Connect Section */}
-          <Card className="text-center border-white/20">
+          <Card className="text-center border-gray-200/80 dark:border-slate-800 !bg-white dark:!bg-slate-900 !backdrop-blur-none shadow-sm">
             <CardContent className="p-8 md:p-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Let's Connect</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">

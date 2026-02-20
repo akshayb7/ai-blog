@@ -6,7 +6,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="glass border-t border-white/20 mt-20">
+    <footer className="bg-gray-50 dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 mt-20">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* About */}
@@ -51,7 +51,7 @@ export default function Footer() {
                 href="https://github.com/akshayb7"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50"
                 aria-label="GitHub"
               >
                 <Github className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -60,7 +60,7 @@ export default function Footer() {
                 href="https://www.linkedin.com/in/akshayb7/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -69,14 +69,14 @@ export default function Footer() {
                 href="https://portfolio.akshayworks.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50"
                 aria-label="Portfolio"
               >
                 <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               </a>
               <a
                 href="mailto:akshay10.bhardwaj@gmail.com"
-                className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors glass-card"
+                className="p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors border border-transparent hover:border-amber-200 dark:hover:border-amber-800/50"
                 aria-label="Email"
               >
                 <Mail className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -86,7 +86,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-white/20 pt-8 text-center text-gray-600 dark:text-gray-400 text-sm">
+        <div className="border-t border-gray-200 dark:border-slate-800 pt-8 text-center text-gray-600 dark:text-gray-400 text-sm">
           <p>© {currentYear} Akshay's Expedition Logs. Charting new territories in AI.</p>
         </div>
       </div>

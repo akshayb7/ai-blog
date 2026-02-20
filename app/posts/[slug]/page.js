@@ -110,7 +110,7 @@ export default async function PostPage({ params }) {
 
           {/* Hero Image - OPTIMIZED WITH NEXT.JS IMAGE */}
           {frontmatter.image && (
-            <div className="glass-card rounded-2xl overflow-hidden mb-8 border border-white/20 relative h-96">
+            <div className="rounded-2xl overflow-hidden mb-8 border border-gray-200/80 dark:border-slate-800 relative h-96 shadow-sm">
               <Image
                 src={frontmatter.image}
                 alt={frontmatter.title}
@@ -128,7 +128,7 @@ export default async function PostPage({ params }) {
           <header className="mb-12">
             {/* Category Badge */}
             <div className="mb-4">
-              <span className="glass-card px-4 py-1.5 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 border border-white/20">
+              <span className="px-4 py-1.5 rounded-full text-sm font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40">
                 {frontmatter.category}
               </span>
             </div>
@@ -185,7 +185,7 @@ export default async function PostPage({ params }) {
           </header>
 
           {/* Post Content */}
-          <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/20">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 md:p-12 border border-gray-200/80 dark:border-slate-800 shadow-sm">
             <div className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:scroll-mt-24
               prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
