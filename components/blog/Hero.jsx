@@ -8,10 +8,10 @@ import { Card } from '@/components/ui/card';
 
 export default function Hero() {
   const categories = [
-    { name: 'Deep Learning', icon: Brain, color: 'from-violet-500 to-purple-600' },
+    { name: 'Deep Learning', icon: Brain, color: 'from-amber-600 to-amber-700' },
     { name: 'GenAI', icon: Sparkles, color: 'from-amber-500 to-orange-600' },
-    { name: 'ML Engineering', icon: Code, color: 'from-emerald-500 to-teal-600' },
-    { name: 'Data Science', icon: BookOpen, color: 'from-rose-500 to-pink-600' },
+    { name: 'ML Engineering', icon: Code, color: 'from-amber-700 to-yellow-700' },
+    { name: 'Data Science', icon: BookOpen, color: 'from-orange-500 to-amber-600' },
   ];
 
   return (
@@ -39,8 +39,8 @@ export default function Hero() {
                 href={`/category/${categorySlug}`}
               >
                 <Badge
-                  variant="glass"
-                  className="px-4 py-2 hover:scale-105 transition-transform cursor-pointer"
+                  variant="outline"
+                  className="px-4 py-2 cursor-pointer border-gray-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700 transition-colors bg-white/80 dark:bg-slate-900/80"
                 >
                   <div className={`bg-gradient-to-r ${cat.color} p-1 rounded mr-2`}>
                     <Icon className="w-4 h-4 text-white" />
