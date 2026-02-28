@@ -21,8 +21,9 @@ test.describe('Homepage', () => {
   });
 
   test('category badges are visible', async ({ page }) => {
-    await expect(page.getByText('Deep Learning')).toBeVisible();
-    await expect(page.getByText('GenAI')).toBeVisible();
+    const main = page.locator('main');
+    await expect(main.getByText('Deep Learning').first()).toBeVisible();
+    await expect(main.getByText('GenAI').first()).toBeVisible();
   });
 
   test('post cards are rendered', async ({ page }) => {
