@@ -18,11 +18,11 @@ export default function Footer() {
               <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Expedition Logs</span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              Deep dives into distributed systems, ML engineering, and AI infrastructure.
-              Written between debugging sessions and adventures.
+              Field notes from building with distributed systems, ML infrastructure, and AI at scale.
+              The failures stay in.
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-3 italic">
-              Currently into: One Piece, techno sets, and distributed systems
+              Currently into: One Piece, F1, techno, and whatever I'm debugging this week
             </p>
           </div>
 

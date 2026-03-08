@@ -16,7 +16,7 @@ describe('Footer', () => {
 
   it('displays the tagline', () => {
     render(<Footer />);
-    expect(screen.getByText(/Deep dives into distributed systems/)).toBeInTheDocument();
+    expect(screen.getByText(/Field notes from building/)).toBeInTheDocument();
   });
 
   it('has link to All Posts', () => {
