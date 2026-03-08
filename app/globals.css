@@ -105,7 +105,7 @@ pre code[data-line-numbers-max-digits='3'] > [data-line]::before {
 }
 
 code {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--font-mono), 'Consolas', 'Monaco', monospace;
 }
 
 [data-highlighted-line] {
