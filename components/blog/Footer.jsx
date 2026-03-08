@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Linkedin, Globe, Mail } from 'lucide-react';
+import { Github, Linkedin, Globe, Mail, Rss } from 'lucide-react';
 import { StrawHat } from '@/components/ui/straw-hat';
 
 export default function Footer() {
@@ -18,11 +18,11 @@ export default function Footer() {
               <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Expedition Logs</span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              Deep dives into distributed systems, ML engineering, and AI infrastructure.
-              Written between debugging sessions and adventures.
+              Field notes from building with distributed systems, ML infrastructure, and AI at scale.
+              The failures stay in.
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mt-3 italic">
-              Currently into: One Piece, techno sets, and distributed systems
+              Currently into: One Piece, F1, techno, and whatever I'm debugging this week
             </p>
           </div>
 
@@ -39,6 +39,16 @@ export default function Footer() {
                 <Link href="/about" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   About
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="/feed.xml"
+                  className="inline-flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                  aria-label="RSS Feed"
+                >
+                  <Rss className="w-3.5 h-3.5 text-amber-500" />
+                  RSS Feed
+                </a>
               </li>
             </ul>
           </div>

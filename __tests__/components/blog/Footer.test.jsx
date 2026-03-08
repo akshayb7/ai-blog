@@ -16,7 +16,7 @@ describe('Footer', () => {
 
   it('displays the tagline', () => {
     render(<Footer />);
-    expect(screen.getByText(/Deep dives into distributed systems/)).toBeInTheDocument();
+    expect(screen.getByText(/Field notes from building/)).toBeInTheDocument();
   });
 
   it('has link to All Posts', () => {
@@ -63,6 +63,12 @@ describe('Footer', () => {
     const { container } = render(<Footer />);
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
+  });
+
+  it('has RSS feed link', () => {
+    render(<Footer />);
+    const link = screen.getByRole('link', { name: /RSS Feed/i });
+    expect(link).toHaveAttribute('href', '/feed.xml');
   });
 
   it('has correct section headings', () => {
