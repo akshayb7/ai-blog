@@ -83,7 +83,7 @@ export default function AboutPage() {
                 <p className="leading-relaxed mb-4">
                   I got into hardware before I got into software. Digit magazine — and I think Chip — both came
                   bundled with CDs full of games and software demos, and I read through them obsessively until I
-                  designed my first PC build in 7th standard. Got my first graphics card that year to play cricket on it.
+                  designed my first PC build in 7th standard. Got my first graphics card that year — Cricket 07 and GTA Vice City, if I'm being honest.
                   That wiring never really left.
                 </p>
 
