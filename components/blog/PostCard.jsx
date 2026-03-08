@@ -25,7 +25,7 @@ export default function PostCard({ post }) {
 
           {/* Category Badge */}
           <div className="absolute top-4 left-4 z-20">
-            <Badge variant="outline" className="bg-white text-gray-900 border-transparent px-3 py-1 text-xs font-semibold">
+            <Badge variant="outline" className="bg-white text-gray-900 dark:bg-black/60 dark:text-white dark:backdrop-blur-md border-transparent px-3 py-1 text-xs font-semibold">
               {post.category}
             </Badge>
           </div>

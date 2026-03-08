@@ -26,7 +26,7 @@ export default function FeaturedPost({ post }) {
 
             {/* Category Badge */}
             <div className="absolute top-6 left-6 z-20">
-              <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-white text-gray-900">
+              <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-white text-gray-900 dark:bg-black/60 dark:text-white dark:backdrop-blur-md">
                 {post.category}
               </span>
             </div>
