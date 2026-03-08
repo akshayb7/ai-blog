@@ -29,7 +29,7 @@ export default function AboutPage() {
               About the Captain
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Charting courses through distributed systems, ML infrastructure, and the occasional rabbit hole
+              Petroleum engineer turned AI director. These are the field notes.
             </p>
           </div>
 
@@ -46,36 +46,52 @@ export default function AboutPage() {
                 <h2 className="text-3xl font-bold mb-4">Hey, I'm Akshay</h2>
 
                 <p className="leading-relaxed mb-6">
-                  I'm an ML engineer who gets genuinely excited about distributed systems and production ML infrastructure.
-                  The kind of person who finds satisfaction in understanding why a system behaves the way it does,
-                  not just that it works.
+                  I trained as a petroleum engineer. Then I watched AlphaGo play Move 37 and that was basically it — I
+                  spent the next few years pivoting hard into AI, went back to first principles, and ended up as
+                  Director of AI/Data Science at a post-Series A startup. The path is not obvious in retrospect either.
                 </p>
 
                 <p className="leading-relaxed mb-6">
-                  I started these expedition logs because I kept running into the same pattern:
-                  documentation that explains <em>what</em> something does, but rarely <em>why</em> it was built that way
-                  or <em>how</em> it actually works under the hood. So I write the deep dives I wish existed when I was learning.
+                  I've spent the last several years building at work while quietly going deep on things nobody asked me to —
+                  distributed systems internals, local model inference, fine-tuning pipelines, whatever I was genuinely
+                  curious about that week. These expedition logs are where that ends up. Not tutorials. Field notes.
+                  The difference matters: tutorials clean up the mess, field notes keep it in.
                 </p>
 
                 <h3 className="text-2xl font-bold mt-8 mb-4">What I Write About</h3>
 
                 <p className="leading-relaxed mb-4">
-                  Mostly distributed systems and ML infrastructure—the stuff that makes training at scale actually work.
-                  My current deep dive series is on Ray's architecture, breaking down everything from the task execution model
-                  to the object store's zero-copy semantics.
+                  Right now: Ray's distributed architecture (7-part series, still going), local AI image generation on
+                  Apple Silicon, and soon — fine-tuning techniques I've actually run. The throughline is systems thinking
+                  applied to ML infrastructure. I want to know why something behaves the way it does, not just that it works.
                 </p>
 
                 <p className="leading-relaxed mb-6">
-                  Every post includes real code, architecture diagrams, and the "aha" moments that come from actually
-                  building with these systems. I believe in learning by doing, so expect practical examples you can run yourself.
+                  Every post has real commands, real benchmarks, and the failures that happened before the thing worked.
+                  I'm not interested in writing content that could have been generated without running the code.
                 </p>
 
-                <h3 className="text-2xl font-bold mt-8 mb-4">When I'm Not Debugging</h3>
+                <h3 className="text-2xl font-bold mt-8 mb-4">Outside the Terminal</h3>
+
+                <p className="leading-relaxed mb-4">
+                  I DJ — mostly for myself, occasionally for people willing to tolerate my taste in techno. I follow
+                  F1 with the kind of attention I should probably reserve for more productive things. One Piece has
+                  been part of my life for 14 years — I've caught up, I can talk about it for hours, and yes, the
+                  blog being called Expedition Logs is not a coincidence.
+                </p>
+
+                <p className="leading-relaxed mb-4">
+                  I got into hardware before I got into software. Digit magazine — and I think Chip — both came
+                  bundled with CDs full of games and software demos, and I read through them obsessively until I
+                  designed my first PC build in 7th standard. Got my first graphics card that year to play cricket on it.
+                  That wiring never really left.
+                </p>
 
                 <p className="leading-relaxed">
-                  I'm probably watching One Piece (yes, I'm still catching up), at a techno show somewhere,
-                  or trying to convince my friends that distributed systems are actually interesting at dinner.
-                  I also have an unhealthy relationship with F1 race weekends, cricket matches, and finding the best food spots in any city I visit.
+                  Outside of that: I love food and I have a system for finding the good spots in any city. I dance —
+                  salsa specifically, which I took up as deliberate embarrassment training and ended up genuinely enjoying.
+                  I read poetry. I'm deep into anime. And I have a weakness for a well-written self-help book, which I
+                  will defend aggressively if pressed.
                 </p>
               </div>
             </CardContent>
@@ -86,7 +102,7 @@ export default function AboutPage() {
             <CardContent className="p-8 md:p-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Let's Connect</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Want to chat about distributed systems, ML, or argue about the best ramen spots? I'm always up for a conversation.
+                Distributed systems, ML infrastructure, AI tools, or where to eat in your city — I'm around.
               </p>
 
               <div className="flex justify-center space-x-4">
