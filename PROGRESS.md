@@ -1,10 +1,15 @@
 # ai-blog Progress
 
 ## Current State
-Branch: `research/image-gen-quantization` — PR #17 open against main, ready to merge.
-Blog is live locally at http://localhost:3001. Dev server running in background.
+PR #17 merged to main. Post 1 is live.
+Post 2 written and saved as untracked file on `research/image-gen-quantization` — needs commit + PR.
 
 ## Recent Changes
+
+### 2026-03-08 — Session: Post 2 written
+- **New post**: `content/posts/ai-image-generation/why-ai-images-look-pixelated-quantization-distillation-inference.mdx` — Part 2 of series. Covers quantization mechanics, the q4/q6/q8 cliff on Qwen, distillation, CFG, and why Klein can't use negative prompts.
+- References existing images (qwen-rome-q4/q6/q8) — no new images needed
+- Cross-links to Post 1
 
 ### 2026-03-08 — Session: AI Image Gen post + About page rewrite
 - **New post**: `content/posts/ai-image-generation/running-image-gen-locally-apple-silicon.mdx` — Part 1 of "Local AI Image Generation" series. Field notes from running Klein/Dev/Qwen on Mac Mini M4 Pro.
@@ -26,17 +31,18 @@ Blog is live locally at http://localhost:3001. Dev server running in background.
 
 ## Next Steps (Prioritized)
 
-1. **Merge PR #17** into main
-2. **Write Post 2**: "Why Your AI Images Look Pixelated: Quantization, Distillation & Inference Explained" — research doc + PROMPT.md already exist in `research/image-gen-quantization/`
+1. **Commit + PR for Post 2** — file is untracked on `research/image-gen-quantization`
+2. **Hero image for Post 2** — `quantization-comparison-hero.png` referenced but doesn't exist yet; use image-gen skill or collage from existing qwen images
 3. **Reddit post**: r/LocalLLaMA is the right sub for Post 1 — native self-post, link at the bottom
-4. **HN submission**: Wait for Post 2 (more technical depth). Best day: Wednesday 8am EST.
-5. **Photo for About page**: Add personal photo when ready — layout currently uses straw hat placeholder
+4. **LinkedIn post for Post 2** — draft via content-repurposer, schedule for next Wednesday 10am
+5. **HN submission**: Now Post 2 exists, good candidate. Best day: Wednesday 8am EST.
+6. **Photo for About page**: Add personal photo when ready — layout currently uses straw hat placeholder
 
 ## Series Status
 
 ### Local AI Image Generation
 - Part 1: ✅ Written, pushed, PR open — "Running AI Image Generation Locally on Apple Silicon"
-- Part 2: 📋 Planned — "Why Your AI Images Look Pixelated: Quantization, Distillation & Inference Explained"
+- Part 2: ✅ Written — "Why Your AI Images Look Pixelated: Quantization, Distillation & Inference Explained" — needs commit + PR
 
 ### Ray Architecture Deep Dive
 - Parts 1-7: ✅ Published on main
