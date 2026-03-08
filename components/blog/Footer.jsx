@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Linkedin, Globe, Mail } from 'lucide-react';
+import { Github, Linkedin, Globe, Mail, Rss } from 'lucide-react';
 import { StrawHat } from '@/components/ui/straw-hat';
 
 export default function Footer() {
@@ -39,6 +39,16 @@ export default function Footer() {
                 <Link href="/about" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                   About
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="/feed.xml"
+                  className="inline-flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                  aria-label="RSS Feed"
+                >
+                  <Rss className="w-3.5 h-3.5 text-amber-500" />
+                  RSS Feed
+                </a>
               </li>
             </ul>
           </div>

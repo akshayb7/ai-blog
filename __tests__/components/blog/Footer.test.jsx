@@ -65,6 +65,12 @@ describe('Footer', () => {
     expect(svg).toBeInTheDocument();
   });
 
+  it('has RSS feed link', () => {
+    render(<Footer />);
+    const link = screen.getByRole('link', { name: /RSS Feed/i });
+    expect(link).toHaveAttribute('href', '/feed.xml');
+  });
+
   it('has correct section headings', () => {
     render(<Footer />);
     expect(screen.getByText('Explore')).toBeInTheDocument();
