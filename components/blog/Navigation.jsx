@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { StrawHat } from '@/components/ui/straw-hat';
 import SearchModal from './SearchModal';
 
 export default function Navigation({ posts = [] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const navLinks = [
     { name: 'All Posts', href: '/posts' },
@@ -17,6 +20,11 @@ export default function Navigation({ posts = [] }) {
     { name: 'About', href: '/about' },
   ];
 
+  // Avoid hydration mismatch — theme is unknown on first server render
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Global keyboard shortcut (Cmd/Ctrl + K) and mobile menu management
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -24,24 +32,19 @@ export default function Navigation({ posts = [] }) {
         e.preventDefault();
         setSearchOpen(true);
       }
-      // Close mobile menu on Escape
       if (e.key === 'Escape' && mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
     };
 
     const handleClickOutside = (e) => {
-      // Close mobile menu when clicking outside
       if (mobileMenuOpen && !e.target.closest('nav')) {
         setMobileMenuOpen(false);
       }
     };
 
     const handleScroll = () => {
-      // Close mobile menu when scrolling
-      if (mobileMenuOpen) {
-        setMobileMenuOpen(false);
-      }
+      if (mobileMenuOpen) setMobileMenuOpen(false);
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -54,6 +57,8 @@ export default function Navigation({ posts = [] }) {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [mobileMenuOpen]);
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
   return (
     <>
@@ -86,6 +91,7 @@ export default function Navigation({ posts = [] }) {
               <button
                 onClick={() => setSearchOpen(true)}
                 className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 glass-card rounded-lg transition-colors"
+                aria-label="Search"
               >
                 <Search className="w-4 h-4" />
                 <span className="hidden lg:inline">Search</span>
@@ -93,20 +99,48 @@ export default function Navigation({ posts = [] }) {
                   ⌘K
                 </kbd>
               </button>
+              {mounted && (
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                </button>
+              )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 hover:bg-white/50 rounded-lg transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-gray-900 dark:text-gray-100" />
-              ) : (
-                <Menu className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+            {/* Mobile: theme toggle + hamburger */}
+            <div className="md:hidden flex items-center gap-2">
+              {mounted && (
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-5 h-5" />
+                  ) : (
+                    <Moon className="w-5 h-5" />
+                  )}
+                </button>
               )}
-            </button>
+              <button
+                className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+                ) : (
+                  <Menu className="w-6 h-6 text-gray-900 dark:text-gray-100" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
