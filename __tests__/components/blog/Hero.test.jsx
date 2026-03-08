@@ -13,34 +13,33 @@ describe('Hero', () => {
     expect(screen.getByText(/Deep dives into distributed systems/)).toBeInTheDocument();
   });
 
-  it('renders all category badges', () => {
+  it('renders the featured category badges', () => {
     render(<Hero />);
-    expect(screen.getByText('Deep Learning')).toBeInTheDocument();
     expect(screen.getByText('GenAI')).toBeInTheDocument();
-    expect(screen.getByText('ML Engineering')).toBeInTheDocument();
-    expect(screen.getByText('Data Science')).toBeInTheDocument();
+    expect(screen.getByText('Distributed Systems')).toBeInTheDocument();
+  });
+
+  it('does not render stale placeholder categories', () => {
+    render(<Hero />);
+    expect(screen.queryByText('Deep Learning')).not.toBeInTheDocument();
+    expect(screen.queryByText('ML Engineering')).not.toBeInTheDocument();
+    expect(screen.queryByText('Data Science')).not.toBeInTheDocument();
   });
 
   it('category badges link to correct category pages', () => {
     render(<Hero />);
 
-    const deepLearningLink = screen.getByRole('link', { name: /Deep Learning/i });
-    expect(deepLearningLink).toHaveAttribute('href', '/category/deep-learning');
-
     const genAILink = screen.getByRole('link', { name: /GenAI/i });
     expect(genAILink).toHaveAttribute('href', '/category/genai');
 
-    const mlEngineeringLink = screen.getByRole('link', { name: /ML Engineering/i });
-    expect(mlEngineeringLink).toHaveAttribute('href', '/category/ml-engineering');
-
-    const dataScienceLink = screen.getByRole('link', { name: /Data Science/i });
-    expect(dataScienceLink).toHaveAttribute('href', '/category/data-science');
+    const distributedSystemsLink = screen.getByRole('link', { name: /Distributed Systems/i });
+    expect(distributedSystemsLink).toHaveAttribute('href', '/category/distributed-systems');
   });
 
-  it('renders category icons', () => {
+  it('renders one icon per category', () => {
     const { container } = render(<Hero />);
     const svgs = container.querySelectorAll('svg');
-    expect(svgs.length).toBe(4);
+    expect(svgs.length).toBe(2);
   });
 
   it('has proper semantic structure', () => {

@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(mflux-generate-flux2:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__vercel__list_teams",
+      "mcp__vercel__list_projects",
+      "mcp__vercel__list_deployments",
+      "mcp__vercel__get_deployment_build_logs",
+      "Bash(npm show:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npx playwright:*)",
+      "Bash(gh run:*)",
+      "Bash(lsof:*)",
+      "Read(//Users/akshaybhardwaj/Pictures/**)",
+      "Read(//Users/akshaybhardwaj/Documents/**)",
+      "Read(//Users/akshaybhardwaj/**)",
+      "Bash(cp:*)",
+      "Bash(mflux-generate:*)",
+      "Bash(gh pr:*)",
+      "WebSearch",
+      "Bash(open:*)",
+      "Bash(git reset:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
+}

@@ -12,7 +12,7 @@ export default function Navigation({ posts = [] }) {
 
   const navLinks = [
     { name: 'All Posts', href: '/posts' },
-    { name: 'Image Generation', href: '/category/ai-image-generation' },
+    { name: 'GenAI', href: '/category/genai' },
     { name: 'Distributed Systems', href: '/category/distributed-systems' },
     { name: 'About', href: '/about' },
   ];
