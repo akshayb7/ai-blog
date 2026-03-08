@@ -131,6 +131,18 @@ npm run build
 - Never commit `.env` files or API keys.
 - Branch naming: `content/<post-slug>`, `feat/<feature-name>`, `chore/<task>`
 
+### Testing
+- **Run `npm test` before every commit.** All 117 unit tests must stay green. Never commit a red suite.
+- **Any component you modify gets its tests updated.** If you change `Footer.jsx`, update `Footer.test.jsx`. If no test file exists for a component you touched, write one alongside the change.
+- **Any new component gets a test file alongside it** — not after, alongside.
+- **Do not lower coverage.** Current baseline: 94.3% statements, 83.9% branch. PRs that reduce coverage need an explicit reason.
+- **E2e tests** (`npm run test:e2e`) require a running build. Run them before merging significant layout or navigation changes — they catch regressions that unit tests miss.
+- **Known FlexSearch issue**: `useSearch.jsx` tests are excluded from vitest (`__tests__/unit/hooks/useSearch.test.jsx`) because FlexSearch causes memory issues in jsdom. Covered by e2e `search.spec.ts` instead.
+- **Test files location**:
+  - Unit tests: `__tests__/components/blog/` and `__tests__/components/ui/` mirroring `components/`
+  - Lib tests: `__tests__/unit/lib/`
+  - E2e tests: `e2e/*.spec.ts`
+
 ### Code Quality
 - **Server Components by default** — `'use client'` only when interactivity is required.
   Push the client boundary to the smallest possible leaf component.
