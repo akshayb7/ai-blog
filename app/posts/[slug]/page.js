@@ -185,7 +185,7 @@ export default async function PostPage({ params }) {
           </header>
 
           {/* Post Content */}
-          <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/20">
+          <div className="p-8 md:p-12">
             <div className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:scroll-mt-24
               prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
