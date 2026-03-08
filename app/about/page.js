@@ -43,7 +43,7 @@ export default function AboutPage() {
                 prose-li:text-gray-700 dark:prose-li:text-gray-300
                 prose-em:text-gray-700 dark:prose-em:text-gray-300
                 dark:prose-invert">
-                <h2 className="text-3xl font-bold mb-4">Hey, I'm Akshay</h2>
+                <h2 className="text-3xl font-bold mb-4">Hey, I'm Akshay. My friends call me AB.</h2>
 
                 <p className="leading-relaxed mb-6">
                   I trained as a petroleum engineer. Then I watched AlphaGo play Move 37 and that was basically it — I
