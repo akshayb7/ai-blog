@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge";
 export default function PostCard({ post }) {
   return (
     <Link href={`/posts/${post.slug}`}>
-      <Card className="h-full overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer group border-white/20">
+      <Card className="h-full overflow-hidden cursor-pointer group border-white/20 hover:border-amber-500/30 transition-colors duration-300">
         <div className="relative h-48 overflow-hidden">
           {/* Image - OPTIMIZED */}
           <Image
             src={post.image}
             alt={post.title}
             fill
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
           />
