@@ -52,10 +52,28 @@ Cover:
 4. **Use the `/image-gen` skill** to generate comparison images for the posts (e.g., same prompt at different quantization levels, same prompt on different models)
 5. **Check existing posts** for style, frontmatter format, and series structure
 
+## Framing — field notes, not tutorial
+
+These posts are **field notes from real experimentation**, not tutorials or guides. The distinction matters:
+- Tutorial: "Here's how to set up mflux on Apple Silicon"
+- Field notes: "Here's what actually happened when I ran three models, what broke, and what I'd do differently"
+
+The failure stories, honest benchmarks, and real machine data (specific times, specific RAM numbers, specific quality cliffs) are what make this content *yours* — not the explanation of what quantization is. Every YouTube tutorial covers the concepts. Nobody else ran Qwen at q4 on a 48GB Mac Mini and documented exactly when it looked like an oil painting.
+
+Write from that angle. The reader should feel like they're reading someone's honest post-mortem, not a getting-started guide.
+
+## LinkedIn extraction strategy
+
+Each post should have one LinkedIn-native insight to extract — a single sharp observation that stands alone:
+- Post 1 candidate: "I tested three AI image models locally. The fast one takes 12 seconds. The smart one took 18 minutes and still surprised me."
+- Post 2 candidate: "I spent 18 minutes generating an image that looked like a bad oil painting. Here's the exact threshold where quantization breaks down."
+
+The blog post is the depth layer. LinkedIn is the hook + link.
+
 ## Writing guidelines
 
 - First-person narrative ("I tested...", "What surprised me was...")
-- Lead with the practical/experiential angle, weave in technical explanations
+- **Lead with a failure or surprise** — not with setup instructions
 - Use real numbers from the benchmarks — don't round or generalize
 - Include the failure stories — they're more interesting than the successes
 - Code blocks for CLI commands
