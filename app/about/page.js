@@ -61,9 +61,22 @@ export default function AboutPage() {
                 <h3 className="text-2xl font-bold mt-8 mb-4">What I Write About</h3>
 
                 <p className="leading-relaxed mb-4">
-                  Right now: Ray's distributed architecture (7-part series, still going), local AI image generation on
-                  Apple Silicon, and soon — fine-tuning techniques I've actually run. The throughline is systems thinking
-                  applied to ML infrastructure. I want to know why something behaves the way it does, not just that it works.
+                  Active series right now: Ray's distributed architecture (7 parts in, still going), local AI image
+                  generation on Apple Silicon, and fine-tuning techniques I've actually run. The throughline across
+                  all of it is systems thinking — I want to know why something behaves the way it does, not just that it works.
+                </p>
+
+                <p className="leading-relaxed mb-4">
+                  Beyond the series: I'm deep in agent orchestration — MCP servers, multi-agent systems, getting
+                  these things to actually coordinate reliably. Automation is an obsession, personal and professional.
+                  I've been hosting on Railway, wiring up databases, and constantly asking how to do the same thing
+                  for less. Cost optimization is not a constraint I resent — it's a design problem I enjoy.
+                </p>
+
+                <p className="leading-relaxed mb-6">
+                  I also read papers. A lot of them. Data architectures, data lakes, model efficiency research — and
+                  I have a thing for pattern recognition across domains, finding the same structure showing up in places
+                  that aren't supposed to be related. When I see one of those, I write about it.
                 </p>
 
                 <p className="leading-relaxed mb-6">
