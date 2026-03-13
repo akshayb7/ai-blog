@@ -1,0 +1,294 @@
+---
+title: "Why Your AI Images Look Pixelated — Quantization, Distillation & Inference"
+date: "2026-03-13"
+description: "I spent 18 minutes generating an image that looked like a bad oil painting. Here's what quantization, distillation, and inference actually do to your outputs — with real benchmarks from three models on Apple Silicon."
+category: "GenAI"
+tags: ["Quantization", "Distillation", "Image Generation", "Apple Silicon", "MLX", "FLUX", "Qwen", "mflux"]
+featured: false
+image: "/images/quantization-distillation-inference.png"
+author: "Akshay"
+readTime: "15 min read"
+series: "Local AI Image Generation"
+seriesPart: 2
+lastModified: "2026-03-13"
+---
+
+I waited 18 minutes for a Qwen Image generation to finish. The prompt was specific: "The Colosseum in Rome at golden hour, with a vintage red Vespa scooter parked in front." When it rendered, the Colosseum had the right arches. The Vespa was recognizable. But the entire image looked like it had been painted with a palette knife — stone textures smeared into blobs, sky gradients stepping instead of flowing, fine detail just... gone.
+
+The flag `-q 4` did that. Four bits of precision instead of sixteen, and I crossed a threshold I didn't know existed.
+
+This is the post I promised at the end of [Part 1](/posts/running-image-gen-locally-apple-silicon). That post covered *what* to run — Klein for speed, Dev for quality, Qwen for world knowledge. This one covers *why* things break the way they do. Why quantization has a cliff. Why Klein can't accept negative prompts — not as a bug, but as an architectural consequence. Why "steps" and "guidance" aren't just sliders to crank up.
+
+Everything here comes from the same Mac Mini M4 Pro with 48GB unified RAM, running [mflux](https://github.com/filipstrand/mflux) v0.16.6.
+
+---
+
+**TL;DR:**
+- Quantization reduces model weight precision to save memory — but there's a quality cliff below 6 bits on large models
+- mflux downloads full models and quantizes at load time, so disk usage is the same regardless of `-q` level
+- Distilled models (Klein) bake guidance into the weights during training — that's why negative prompts and custom guidance are architecturally impossible, not just unsupported
+- "Steps" = denoising iterations. "Guidance" = how hard the model follows your prompt. "Negative prompt" = what to steer away from (requires classifier-free guidance, which distilled models skip)
+- Apple Silicon's unified memory is the reason a 20B model runs locally at all — no separate VRAM bottleneck
+
+---
+
+## The Pixelation Experiment
+
+Let me show you what I mean before I explain why.
+
+Same prompt. Same model (Qwen Image, 20B parameters). Same seed (7742). Same resolution (1280×864). Same 30 steps. The only variable: quantization level.
+
+| Quantization | RAM Usage | Time (30 steps) | What Happened |
+|---|---|---|---|
+| `-q 4` | ~14GB | ~17.5 min | Pixelated. Stone textures smeared, sky had visible banding, fine detail dissolved into painterly blobs |
+| `-q 6` | ~20GB | ~18.3 min | Clean. Textures resolved properly, gradients smooth, architectural detail preserved |
+| `-q 8` | ~25GB | ~21.4 min | Best. Marginal improvement over q6 — diminishing returns, but noticeably sharper on close inspection |
+
+The jump from q4 to q6 was not gradual. It was a cliff. Same model, same prompt, same seed — and the difference between "oil painting" and "photograph" was 2 bits of precision.
+
+That cliff is the thing most guides don't tell you about. They'll say "lower quantization = lower quality" and leave it at that. What I found is that quality degrades non-linearly. There's a threshold below which the model loses enough information that textures, gradients, and fine spatial detail all degrade simultaneously.
+
+On a 20B model, that threshold is somewhere between 4 and 6 bits.
+
+---
+
+## What Quantization Actually Does
+
+A neural network is a massive collection of numbers — weights — that have been tuned during training. A 20B parameter model like Qwen Image has 20 billion of these weights. At full precision (bf16), each weight uses 16 bits. That's 40GB just for the weights.
+
+**Quantization reduces the number of bits per weight.**
+
+| Precision | Bits per Weight | Approximate Memory (20B model) | Quality Impact |
+|---|---|---|---|
+| bf16 (full) | 16 | ~40GB | Baseline |
+| 8-bit | 8 | ~20GB | Minimal loss |
+| 6-bit | 6 | ~15GB | Slight loss, usually acceptable |
+| 4-bit | 4 | ~10GB | Significant loss — visible artifacts |
+| 3-bit | 3 | ~7.5GB | Severe degradation |
+
+The math is straightforward: fewer bits = fewer possible values each weight can take = less precision in the model's internal representations. The question is where the loss becomes visible.
+
+For a 4B model like Klein, it doesn't matter much — 8GB at full precision fits easily in memory. There's no reason to quantize.
+
+For a 20B model like Qwen, you *have* to quantize unless you have 40GB+ of GPU memory available. The question becomes: how much precision can you sacrifice before the output falls apart?
+
+### Why mflux Downloads the Full Model
+
+This surprised me initially. When you run `mflux-generate-qwen -q 4`, mflux still downloads the complete bf16 model (~54GB cached with all components). The quantization happens at load time, not download time.
+
+Why? Because mflux uses [MLX](https://github.com/ml-explore/mlx) — Apple's ML framework for Apple Silicon. MLX loads the full-precision weights, then quantizes them in memory before inference begins. This means:
+
+1. **Disk usage is identical** regardless of quantization level. `-q 4` and `-q 8` download the same files.
+2. **Initial load requires the full model in memory briefly.** Even with `-q 4`, the process needs to hold ~40GB of bf16 weights while converting them to 4-bit. On my 48GB machine, Qwen at `-q 8` made the initial load genuinely sketchy — the process appeared to hang for over a minute before inference started.
+3. **You can experiment freely** with different quantization levels without re-downloading anything.
+
+This is different from the [GGUF](https://github.com/ggerganov/ggml) approach used in text LLMs (llama.cpp and friends), where you download a pre-quantized file at your chosen precision level. GGUF files are smaller on disk and faster to load, but you need a separate file for each quantization level.
+
+MLX's approach trades disk space and load time for flexibility. For image generation where you're running a model intermittently (not serving it continuously), this is a reasonable tradeoff.
+
+---
+
+## The Quality Cliff: Why 4-bit Breaks
+
+Not all information in a neural network is equally important.
+
+In a diffusion model like Qwen Image, the weights encode two kinds of information: **high-level semantic understanding** (what a Colosseum looks like, what a Vespa is) and **fine-grained spatial detail** (stone texture patterns, smooth gradient transitions, precise edge positions).
+
+When you quantize aggressively:
+
+- **Semantic understanding survives.** Even at 4 bits, the model knew what the Colosseum looked like. The arches were in the right places. The Vespa was recognizable. World knowledge is robust to quantization because it's encoded in large-scale weight patterns.
+
+- **Spatial detail dies.** Texture rendering, gradient smoothness, and fine edge detail require precise weight values. When you crush 16 bits down to 4, the weight values get rounded to the nearest representable number. That rounding error compounds across 20 billion parameters, and it shows up as exactly what I saw: smeared textures, stepped gradients, detail that looks like it was painted with a broad brush.
+
+This is why the q4 → q6 jump was so dramatic. At 6 bits, there are enough representable values to preserve the spatial precision that texture detail needs. At 4 bits, you're below that threshold.
+
+### The Model Size Factor
+
+Here's the insight that took me a few experiments to land on: **quantization impact scales with model size, but not the way you'd expect.**
+
+A 4B model at full precision (Klein, no quantization, ~8GB) produces better textures than a 20B model at aggressive quantization (Qwen at q4, ~10GB). The smaller model with more bits per weight beats the larger model with fewer bits per weight — at least for spatial detail.
+
+The 20B model's advantage in *knowledge* (architectural accuracy, text rendering, real-world object recognition) doesn't help if the *rendering quality* falls apart. You get a Colosseum that's structurally correct but looks like a Monet.
+
+**The practical rule:** use the largest model that fits comfortably in memory at the highest quantization level that leaves headroom. "Comfortably" means enough room for the initial load + the inference process + whatever else your machine is running. On 48GB, that's Qwen at q6 (~20GB) with breathing room, or q8 (~25GB) if you close everything else.
+
+---
+
+## Distillation: Why Klein Can't Use Negative Prompts
+
+In [Part 1](/posts/running-image-gen-locally-apple-silicon), I ran into two failures with Klein:
+
+```bash
+# Attempt 1: negative prompt
+mflux-generate-flux2 --model flux2-klein-4b --prompt "..." --negative-prompt "blurry, low quality"
+# Error: "negative-prompt is not supported for FLUX.2"
+
+# Attempt 2: custom guidance
+mflux-generate-flux2 --model flux2-klein-4b --prompt "..." --guidance 3.5
+# Error: "guidance is only supported for FLUX.2 base models. Use --guidance 1.0"
+```
+
+These aren't missing features. They're architectural constraints of how Klein was built.
+
+### What Distillation Does
+
+**Knowledge distillation** trains a smaller "student" model to mimic a larger "teacher" model. The teacher (a full-size FLUX model) generates outputs, and the student (Klein, 4B) learns to produce similar results with fewer parameters and fewer inference steps.
+
+The result: Klein generates an image in **4 steps and ~12 seconds**. A base model like FLUX.1 Dev needs **20 steps and ~1.5 minutes** for comparable quality. That speed comes from the student learning compressed shortcuts — it doesn't iterate through the full denoising process, it jumps closer to the answer.
+
+But the compression has consequences.
+
+### Why Negative Prompts Are Architecturally Impossible
+
+To understand why, you need to know how negative prompts work in base models.
+
+Base models use **classifier-free guidance (CFG)** — a technique where the model runs inference **twice** per step:
+
+1. **Conditioned pass:** generate the image using your prompt ("Colosseum at golden hour...")
+2. **Unconditioned pass:** generate the image with no prompt at all (or with the negative prompt)
+
+The final output is computed by *interpolating* between these two passes. The guidance scale controls how far you push toward the conditioned result and away from the unconditioned one:
+
+$$\text{output} = \text{unconditioned} + \text{guidance\_scale} \times (\text{conditioned} - \text{unconditioned})$$
+
+This is why higher guidance means stricter prompt adherence — you're pushing harder toward the conditioned output. It's also why very high guidance (8+) degrades quality — you're overshooting, optimizing for prompt match at the cost of image coherence.
+
+**Negative prompts plug into the unconditioned pass.** When you specify `--negative-prompt "blurry, low quality"`, the unconditioned pass uses that text instead of no text. The model then steers *away* from "blurry, low quality" by the guidance scale amount.
+
+**Distilled models skip the dual-pass process entirely.** Klein was trained to produce the final output in a single forward pass per step. The teacher's CFG behavior — how it balanced conditioned and unconditioned signals — was baked into Klein's weights during distillation. The architecture literally doesn't have the mechanism to process a second conditioning signal.
+
+This is why `--negative-prompt` doesn't just "not work" — it *can't work*. There's no unconditioned pass to inject it into. And `--guidance` is fixed at 1.0 because there's no interpolation between two passes to scale.
+
+---
+
+## The Three Parameters That Actually Matter
+
+If you're running base models (Dev, Qwen), three parameters control almost everything about your output quality:
+
+### Steps (Denoising Iterations)
+
+Image generation starts with random noise and iteratively refines it into an image. Each step runs the full model once to predict and remove noise.
+
+- **More steps = cleaner image** (up to a point). Going from 10 to 20 steps is dramatic. Going from 30 to 50 is usually invisible.
+- **Distilled models need fewer steps** because each step does more work — Klein produces good results at 4 steps where Dev needs 20.
+- **Each step has a fixed cost.** On Qwen at q6, each step takes ~36 seconds. At 30 steps, that's ~18 minutes. At 50 steps, that's ~30 minutes — for marginal improvement.
+
+The sweet spots I found:
+
+| Model | Steps | Reasoning |
+|---|---|---|
+| Klein (distilled, 4B) | 4 | Optimized for this during distillation. More steps don't help much. |
+| Dev (base, 12B) | 20 | Sweet spot between quality and time. Tested 10/20/30 — 20 was the inflection. |
+| Qwen (base, 20B) | 30 | Larger model benefits from more refinement passes. 20 was noticeably softer. |
+
+### Guidance Scale
+
+Controls how aggressively the model follows your text prompt. Only works on base models (see CFG explanation above).
+
+- **1.0:** No guidance. The model generates freely. This is what distilled models are locked to.
+- **2.0–4.0:** Balanced. Prompt-adherent but still natural. Default is 3.5 for most FLUX models.
+- **5.0–7.0:** Strict. Good for precise compositions, but faces and textures start looking slightly artificial.
+- **8.0+:** Overfitted to the prompt. Colors saturate, details exaggerate, realism drops. Not recommended.
+
+I mostly leave this at 3.5. The times I adjusted it were when Qwen was ignoring a specific element in the prompt (bumped to 5.0, it included the element, but the overall image was slightly less natural).
+
+### Negative Prompt
+
+Tells the model what to steer away from. Only works on base models — requires the CFG mechanism.
+
+Common negative prompts for image quality:
+```text
+blurry, low quality, distorted, deformed, watermark, text overlay, cropped
+```
+
+What I actually use with Dev:
+```bash
+mflux-generate --model dev \
+  --prompt "A forest path at dawn, mist between the trees, golden light filtering through canopy" \
+  --negative-prompt "blurry, low quality, distorted, oversaturated, cartoon" \
+  --guidance 3.5 --steps 20 -q 8
+```
+
+The negative prompt matters most when you're seeing consistent artifacts — if every generation comes back slightly blurry, adding "blurry" to the negative prompt is more effective than cranking up guidance.
+
+---
+
+## Why This Works on Apple Silicon
+
+Traditional GPU setups have a hard wall: VRAM. An NVIDIA RTX 4090 has 24GB of VRAM. A 20B model at full precision needs 40GB. It simply doesn't fit — you're quantizing out of necessity, not preference.
+
+Apple Silicon flips this with **unified memory**. CPU and GPU share the same physical RAM. My Mac Mini's 48GB is simultaneously system memory and GPU memory. The [MLX framework](https://github.com/ml-explore/mlx) exploits this — operations run on CPU or GPU without copying data between them, because there's no separate memory pool.
+
+This means:
+- **A 20B model at q6 (~20GB) runs with 28GB of headroom.** On an NVIDIA setup, you'd need a GPU with 20GB+ VRAM *just for the model weights*, plus overhead for the inference process.
+- **The initial load (full bf16 → quantized) is possible** because 40GB of weights can temporarily occupy unified memory during the conversion. On a 16GB GPU, the full weights wouldn't fit in memory at all — you'd need pre-quantized weights (GGUF approach).
+- **You can run larger models at higher precision** than equivalent NVIDIA hardware at the same price point. A Mac Mini with 48GB costs roughly $1,000. An NVIDIA setup with 48GB of VRAM means an A6000 Ada at $4,000+.
+
+The tradeoff: Apple Silicon is slower per inference step than a dedicated NVIDIA GPU. My Qwen generations at q6 take ~36 seconds per step. On an RTX 4090, the same step would take 5-10 seconds. You're paying for the memory advantage with time.
+
+For experimentation and iteration — running 20 variations of a prompt to understand how parameters affect output — the unlimited local generation at the cost of time is a better deal than $0.04/image × 20 variations on an API.
+
+---
+
+## Practical Recommendations by Hardware
+
+Based on what I've tested and the math of model sizes:
+
+### 16GB Unified Memory (MacBook Air M2/M3, base Mac Mini)
+- **Klein (4B, no quantization):** Fits easily at ~8GB. Your best option.
+- **Dev (12B) at q4:** ~6GB for weights, but quality may suffer at this quantization level. Worth trying.
+- **Qwen:** Don't attempt. Even at q4, the initial load of the full bf16 model will exceed available memory.
+
+### 24GB Unified Memory (MacBook Pro M3 Pro)
+- **Klein:** Full speed, no compromises.
+- **Dev at q8:** ~13GB, comfortable fit with headroom. Recommended.
+- **Qwen at q4:** Technically fits (~14GB), but you'll see the pixelation artifacts I documented. Not recommended.
+
+### 36GB Unified Memory (MacBook Pro M3 Max)
+- **Dev at q8:** Comfortable.
+- **Qwen at q6:** ~20GB, leaves 16GB headroom. This is where Qwen becomes usable.
+
+### 48GB+ Unified Memory (Mac Mini M4 Pro, Mac Studio)
+- **Qwen at q6:** Sweet spot. ~20GB with plenty of breathing room.
+- **Qwen at q8:** ~25GB, best quality, but watch the initial load. Close other memory-heavy applications first.
+- **Dev at full precision (no quantization):** ~24GB. Interesting experiment — removes any quantization artifacts entirely.
+
+---
+
+## What I Got Wrong Initially
+
+I assumed quantization was a smooth tradeoff — less memory for proportionally less quality. Slide the dial, pay the tax, move on.
+
+It isn't. It's a cliff function. You're fine, you're fine, you're fine — and then you're looking at a Colosseum made of clay.
+
+I also assumed bigger model = better output in all cases. That's only true when you can afford the precision. A 4B model at 16 bits will render better textures than a 20B model at 4 bits. The model size advantage only kicks in when you have the memory to keep the weights precise enough for the spatial detail to survive.
+
+And I initially saw Klein's limitation with negative prompts as a software bug — surely a future mflux update would fix it. It won't. It can't. The architecture doesn't have the dual-pass mechanism that negative prompts require. Understanding *why* made the constraint feel less arbitrary and more like a legitimate engineering tradeoff: you get 12-second generation, and the cost is giving up fine-grained prompt control.
+
+---
+
+## The Decision Framework
+
+After running these experiments, here's how I actually choose:
+
+**If generation speed matters more than control:** Klein, 4 steps, no quantization. You're done in 12 seconds. Accept that you can't steer away from specific artifacts.
+
+**If you need full control and photorealism:** Dev at q8, 20 steps, guidance at 3.5 with a tailored negative prompt. ~1.5 minutes at 512×512, ~4.5 minutes at 768×1024.
+
+**If the image needs to depict a real thing correctly — architecture, a specific object, text in the image:** Qwen at q6 (or q8 if your machine handles it), 30 steps. Accept the 18+ minute wait. The world knowledge is worth it when accuracy matters.
+
+**If you're on 16GB:** Klein only. Don't fight the hardware.
+
+**If you're on 24–36GB:** Dev is your primary tool. Qwen becomes viable at 36GB.
+
+**If you're on 48GB+:** All three are available. Route by use case, not by hardware constraint.
+
+---
+
+Three models. Three sets of constraints. The constraints aren't arbitrary — they're consequences of how each model was built: distilled or base, how many parameters, how many bits per weight.
+
+Once you understand the *why*, the routing decisions stop being guesswork.
+
+---
+
+*All benchmarks from Mac Mini M4 Pro, 48GB unified RAM, mflux v0.16.6. Part 1 of this series: [Running AI Image Generation Locally on Apple Silicon](/posts/running-image-gen-locally-apple-silicon).*
