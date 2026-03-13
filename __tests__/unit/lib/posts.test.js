@@ -88,17 +88,12 @@ describe('lib/posts', () => {
       }
     });
 
-    it('returns featured post if one exists, otherwise first post', () => {
+    it('returns the most recent post (newest first)', () => {
       const featured = getFeaturedPost();
       const allPosts = getAllPosts();
 
       if (featured) {
-        const hasFeaturedPost = allPosts.some((p) => p.featured === true);
-        if (hasFeaturedPost) {
-          expect(featured.featured).toBe(true);
-        } else {
-          expect(featured.slug).toBe(allPosts[0]?.slug);
-        }
+        expect(featured.slug).toBe(allPosts[0]?.slug);
       }
     });
   });
