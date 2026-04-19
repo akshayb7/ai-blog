@@ -1,0 +1,245 @@
+---
+title: "Attention is a Potluck"
+date: "2026-04-18"
+description: "A tactile, phone-readable walkthrough of the single mechanism that makes every modern LLM actually understand language — no matrices first, no jargon, no mush."
+category: "Codex"
+tags: ["Attention", "Transformers", "LLM Fundamentals", "Self-Attention"]
+featured: true
+image: "/images/attention-is-a-potluck.png"
+author: "Akshay"
+readTime: "14 min read"
+series: "The Codex"
+lastModified: "2026-04-18"
+---
+
+I first implemented attention from scratch in PyTorch in 2020. I sat with the paper, I understood every symbol, I got the tensor shapes right, I trained something small, it worked. I felt like I got it.
+
+Six years later, Gemma 4 dropped and I sat down to fine-tune it with Unsloth. I opened the tech report, hit the first diagram with a query projection and a rotary embedding stacked on a grouped-query attention head, and realized something uncomfortable.
+
+I didn't actually remember how attention worked.
+
+Not the equations — those I could re-derive in a few minutes with a textbook. I mean the *shape* of it. The intuition that lets you look at a new paper and immediately feel what's going on before you've read a word. That had evaporated. And when I tried to rebuild it from the analogies floating around the internet — cocktail parties, research symposia, libraries of filing cabinets — none of them stuck. I'd read an explainer, nod, close the tab, and twenty minutes later feel it sliding out of my head again.
+
+So I tried to build one that wouldn't slide.
+
+This is the first entry in what I'm calling **The Codex** — a living, unnumbered notebook on modern LLM architecture. The goal isn't to teach attention for the first time. It's to teach it *in a way you will never forget.* No matter how many months pass between reading this and someone at dinner asking "wait, what's attention actually doing?", the image I'm about to hand you should come back instantly.
+
+Each entry in the Codex stands on its own. No part numbers. They link by idea, not by sequence, and I'll keep adding to it as Qwen and Claude and whatever ships next gives me something new to sit with. But everything starts here. Attention is the atom. If this one image lands, every other entry — RoPE, multi-head, KV cache, MoE, quantization — is a variation on this single move.
+
+Grab a coffee. I promise no matrices for the first half.
+
+## You walk into a potluck
+
+The door opens. The table is set. There are **four dishes**, and that's it.
+
+Each dish has two things:
+
+- A **handwritten label card** in front: *spicy Thai noodles*, *grandma's apple pie*, *kale salad*, *butter chicken*.
+- The **actual food** behind the card.
+
+And you walk in with one thing in your head: **a craving**. Tonight your craving is *something warm and spicy.*
+
+That's the whole cast. Three objects:
+
+- **Your craving** — what you're looking for.
+- **The label cards** — what each dish advertises itself as.
+- **The actual food** — what you'd actually put on your plate.
+
+Hold that picture. It doesn't get more complicated than this.
+
+## What you actually do (and what you definitely don't)
+
+Here's where every explainer I've ever read goes off a cliff. They say "the model picks the best match" or "attention selects the most relevant word." That's not what happens. Not even close.
+
+What you do, if you're honest about cravings, is you **score every label against your craving**:
+
+- Thai noodles → *warm and spicy*? Strong match. Score: **high**.
+- Butter chicken → *warm and spicy*? Pretty good. Score: **high-ish**.
+- Apple pie → *warm and spicy*? Warm yes, spicy no. Score: **medium-low**.
+- Kale salad → *warm and spicy*? Neither. Score: **low**.
+
+Now the move that *is* attention. You don't pick a winner. You build **one plate** that is a **weighted mix of all four dishes**, with each portion sized by how well its label matched your craving.
+
+Your plate comes out as:
+
+- A big scoop of Thai noodles.
+- A decent helping of butter chicken.
+- A small bite of apple pie — warm counts a little.
+- Barely a leaf of kale.
+
+![A single ceramic plate shown from above holding a deliberately imbalanced meal: about half the plate is a generous heap of Thai noodles with chilies, a quarter is butter chicken in orange tomato-cream gravy, a smaller wedge is apple pie, and a single kale leaf sits at the edge — the proportions tell the story of a weighted mix.](/images/potluck-weighted-plate.png)
+
+**That plate is the output of attention.** One plate, made from all four dishes, mixed in proportions set by your craving. Every dish contributes something. Even the kale. Nobody is fully taken. Nobody is fully ignored.
+
+Sit with that last sentence, because it's load-bearing. It's why attention works at all. If the model had to *pick* one dish and discard the rest, there'd be no gradient to train on — no smooth way for the model to learn that "next time, weight the noodles a little higher and the kale a little lower." A weighted mix is continuous. A pick is not. Everything downstream — training stability, learnability, the entire deep learning recipe — depends on the fact that **nothing is ever fully ignored**.
+
+## Three names for the three things
+
+The paper uses jargon. The jargon is the jargon. Let's just map it.
+
+- Your **craving** → the paper calls this **Q**, for **Query**. "What am I looking for?"
+- The **label cards** → the paper calls these **K**, for **Keys**. "What does each thing advertise?"
+- The **actual food** → the paper calls this **V**, for **Values**. "What do I actually bite into?"
+
+Q, K, V. Craving, labels, food. That's the whole vocabulary. If someone asks you what Q, K, V are and you think *craving, label, food*, you will never be wrong.
+
+## The subtlety most explainers skip
+
+Notice something. At our potluck, the **label** and the **food** are not the same object. The card says *spicy Thai noodles*. That's how the dish gets matched. But what ends up on your plate is the actual noodles — the strands, the chili oil, the basil — not the words on the card.
+
+Label ≠ food.
+
+This is why attention has *two* things per dish (K and V) instead of one. The label is for matching. The food is for eating. They're derived from the same word, but they play completely different roles.
+
+In a casual reading of the 2017 paper this looks like a quirk. It's not. The K/V split is the reason a whole family of optimizations exists in modern LLMs — the **KV cache** being the biggest one. When a model generates text one token at a time, it doesn't need to re-derive the labels and foods of previous tokens over and over; it can *write them down once* and reuse them. That's what makes ChatGPT fast enough to chat with. But that's a Codex entry for later. For now, just note: **there's a reason the paper keeps K and V separate, and the reason matters downstream.**
+
+## Scores into proportions: the small machine called softmax
+
+One more thing before we leave the single-guest potluck.
+
+The match scores we threw around — *high*, *high-ish*, *medium-low*, *low* — eventually need to become actual numbers that multiply the foods. And raw match scores can be ugly. They might be `3.2`, `2.8`, `0.7`, `-1.1`. You can't multiply food by `-1.1` and get a plate.
+
+So there's a little machine between raw scores and plate proportions. It takes whatever numbers you hand it — positive, negative, large, small — and squishes them into clean percentages that **add up to 100%**. Noodles 50%, butter chicken 35%, apple pie 10%, kale 5%.
+
+That machine is called **softmax**. You don't need to remember the name. Just hold the flow:
+
+> **Craving → scored against every label → scores turned into proportions (softmax) → plate built from all the foods in those proportions.**
+
+Read that sentence out loud once. That's single-head attention. That's the atom. Everything else we're going to build in the Codex is a variation on that one move.
+
+## The leap: every word is a guest *and* a dish
+
+Here's where it gets weird, and then quickly becomes obvious.
+
+Everything I described — you, walking into a potluck, with one craving — is one guest at one buffet. A sentence isn't one guest. A sentence is six, or twenty, or fifty thousand.
+
+Take *The cat sat on the mat.*
+
+Every single word in that sentence is simultaneously **three things**:
+
+- A **guest** walking in with its own craving.
+- A **labeled dish** sitting on the table.
+- A **food** behind the label.
+
+Same six words. Three roles each. All at once.
+
+*cat* is a guest with a craving — maybe *find the verb I'm doing, find the thing I'm on.* *cat* is also a labeled dish — *I'm a noun, I'm an animate subject.* *cat* is also food — *if you pick me, here's what you get.* And *sat*, *mat*, *the*, *on* — each of them plays the same three roles in parallel.
+
+This is why it's called **self**-attention. The guests and the dishes are the same people. The sentence is looking at itself.
+
+![Overhead view of a round wooden dining table with several place settings arranged evenly around it, each setting holding an empty plate. Bold amber curved lines sweep across the center of the table, connecting every seat to every other seat — a visible web of glances suggesting every word attending to every other word.](/images/self-attention-roundtable.png)
+
+## What actually happens at the table
+
+All six words walk into the room together. No queue. No order of operations. They all go at once.
+
+- *The* scores every label with its craving. Builds its plate.
+- *cat* scores every label with *its* craving. Builds *its* plate.
+- *sat* does the same.
+- *on*. *the*. *mat*. All six, in parallel.
+
+Six guests. Six plates. Built simultaneously from the same table of six dishes.
+
+Each plate is a **new version** of that word — a version that now knows about the rest of the sentence.
+
+Before attention, *cat* was just *cat*. Four letters, a meaning, an island. After self-attention, *cat*'s plate is heavy on *sat* (because *cat*'s craving matched *sat*'s label well — verbs matter to subjects), decent on *mat* (locations matter), with slivers of *The* and *on*. The new *cat* is no longer just *cat*. It's ***cat-in-the-context-of-this-sentence***.
+
+This is the thing. This is why transformers understand language. Words stop being islands. **Every word becomes a weighted mix of itself plus the other words that mattered to it.**
+
+Hold that sentence. That's the one.
+
+## The thing that feels magical but isn't
+
+You might be thinking: wait. If every word's craving is just the word itself, how does *cat* know to crave *sat*? How does it know to crave verbs at all?
+
+Good instinct. The answer is small and clean.
+
+**The craving isn't the word. The craving is a learned translation of the word.**
+
+When *cat* walks into the room, it doesn't directly hand its word-identity to the buffet. It hits three little translators at the entrance first. I think of them as three chefs:
+
+- **Chef Q** takes *cat* and turns it into *cat's craving* — what cat is looking *for* in context.
+- **Chef K** takes *cat* and turns it into *cat's label* — how cat *advertises itself* to other words.
+- **Chef V** takes *cat* and turns it into *cat's food* — what cat *contributes* when chosen.
+
+![Three small wooden chef stations arranged in a row in a warm kitchen doorway, each with a distinct implement — a puffy white chef's hat at the first (the craving), a stack of blank cards with a quill and inkwell at the second (the labels), and wooden serving utensils at the third (the food). No chefs visible, just the three stations bathed in warm amber light.](/images/three-chefs-entrance.png)
+
+Three different chefs. Three different transformations of the same starting word. The chefs are literally just learned matrices — the paper calls them $W^Q$, $W^K$, $W^V$ — and they **learn their recipes during training.** That's what training *is*. Over billions of examples, Chef Q learns to produce cravings that tend to match verb-labels and location-labels for noun-subjects like *cat*, because those are the cravings that produce plates that help the model predict the next word correctly.
+
+Nobody hand-codes these chefs. They emerge from the data.
+
+## OK, the math
+
+We've done the whole picture without a single equation. Now let's name the math — not to replace the image, but to give you the matching vocabulary when you read a paper.
+
+You start with a sentence. Every word is a vector — let's say 512 numbers long. Stack them into a matrix $X$ with one row per word.
+
+The three chefs are matrices too. Multiply $X$ by each chef to get three new matrices:
+
+$$
+Q = X W^Q \qquad K = X W^K \qquad V = X W^V
+$$
+
+Three different views of the same sentence. Cravings, labels, foods. One row per word in each.
+
+Now the match scoring. For every guest's craving, score it against every dish's label. That's the dot product of every row of $Q$ with every row of $K$:
+
+$$
+\text{scores} = Q K^\top
+$$
+
+For our six-word sentence this comes out as a 6×6 grid. Row 2, column 5 is *cat*'s craving scored against *the*'s label. Row 3, column 2 is *sat*'s craving scored against *cat*'s label. One cell per craving-label pair.
+
+Two small fixes before softmax. First, divide by $\sqrt{d_k}$ — where $d_k$ is the length of a craving vector. This prevents the scores from getting so large that softmax becomes a sharp pick instead of a soft mix (it's a saturation thing; save it for when you sit down with a coffee). Second, run softmax across each row so each guest's scores become proportions that sum to 1:
+
+$$
+\text{attention}(Q, K, V) = \text{softmax}\!\left(\frac{Q K^\top}{\sqrt{d_k}}\right) V
+$$
+
+Read the equation right-to-left and it's our sentence: **multiply proportions by foods to build plates.** Read left-to-right and it's the matching: **craving dot label, scaled, softmaxed, then weighted sum over foods.**
+
+That's it. That's the equation everyone points at. It's the potluck, written in matrices.
+
+## Why this one move is so powerful
+
+Three things that took me embarrassingly long to notice.
+
+**It's parallel by design.** Every guest builds their plate at the same time, in one big matrix multiply. There's no sequential "process word 1, then word 2, then word 3" like the old RNN days. This is the reason transformers train on modern GPUs at all. Attention is a matmul. GPUs eat matmuls for breakfast.
+
+**It's position-agnostic — which is both a feature and a disaster.** The attention move doesn't care which seat a word is sitting in. *The cat sat on the mat* and *The mat sat on the cat* produce the same plates. That's obviously wrong. The fix — the ribbon you pin on each guest before they walk to the buffet — is its own Codex entry, but it's worth knowing the gap exists. Attention alone is not enough. Attention + something-that-encodes-order is the real unit.
+
+**It's one move.** Not a family of moves. Not a stack. One move. Everything that's come since — multi-head attention, rotary embeddings, grouped-query attention, FlashAttention, sliding windows, KV caches, paged attention, MoE routing — is a variation on **this one move**. Better ways to run it, cheaper ways to run it, specialized ways to run it. None of them are a new move. That's a comforting thing to realize when you sit down with a Gemma 4 technical report.
+
+## What this has to do with Gemma 4
+
+Here's the honest payoff, which is the reason I'm writing this at all.
+
+The mechanism you just read — craving scored against labels, softmaxed into proportions, weighted mix of foods — is what Gemma 4 is doing when it reads a 256,000-token document and somehow tracks a character across 400 pages. It is what Claude is doing when it notices you contradicted yourself eight messages ago. It's what every model you've ever found useful is doing, underneath the UI.
+
+With one caveat: they're not doing it once. They're doing it roughly **48 times in a row**, with **eight specialized parallel versions in every single layer**, with **express lanes** that carry the original word through every transformation so nothing is lost, with **seat ribbons** pinned on each word so order is preserved, and with dozens of small optimizations that make the whole thing fit in memory.
+
+That stack is what's coming in the next few Codex entries. The seat ribbons. The eight parallel potlucks. The express lanes between stacked blocks. The written-down menu board that is the KV cache. Each one is a standalone entry. Each one is a small variation on the atom you just learned.
+
+If you hold the potluck in your head, they'll all click. If you skip the potluck, none of them will.
+
+## The one sentence to walk away with
+
+If I could hand you one sentence to pin to a whiteboard, this would be it:
+
+> **The query is matched against every key to find how well each one satisfies what I'm looking for. Those match scores then decide how much of each value ends up on my plate.**
+
+Craving, labels, food. Scored, softmaxed, summed. Every word does it. Every word *is* it.
+
+Welcome to the Codex. More soon.
+
+## What's next
+
+Upcoming entries in the Codex will cover:
+
+- **The seat ribbons.** How the model teaches attention about word order, why raw position numbers fail, and why every 2026 model uses something called RoPE instead.
+- **Eight friends at the buffet.** Why one potluck isn't enough, and how multi-head attention gives you eight specialized opinions for the same cost as one generalist — the closest thing to a free lunch in deep learning.
+- **The express lane.** Why transformers stack 48 layers deep, and the almost-embarrassingly-simple trick that keeps information from getting lost when you do.
+
+Each entry stands alone. Each entry points back to this one. The Codex is a notebook, not a book — it grows as the field does.
+
+If any part of this was unclear, or if the analogy broke down somewhere for you, tell me. The whole point is retention. If it's not retained, it's not written well enough yet, and I'd rather fix it than leave it.
