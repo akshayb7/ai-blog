@@ -15,6 +15,7 @@ describe('Hero', () => {
 
   it('renders the featured category badges', () => {
     render(<Hero />);
+    expect(screen.getByText('Codex')).toBeInTheDocument();
     expect(screen.getByText('GenAI')).toBeInTheDocument();
     expect(screen.getByText('Distributed Systems')).toBeInTheDocument();
   });
@@ -29,6 +30,9 @@ describe('Hero', () => {
   it('category badges link to correct category pages', () => {
     render(<Hero />);
 
+    const codexLink = screen.getByRole('link', { name: /Codex/i });
+    expect(codexLink).toHaveAttribute('href', '/category/codex');
+
     const genAILink = screen.getByRole('link', { name: /GenAI/i });
     expect(genAILink).toHaveAttribute('href', '/category/genai');
 
@@ -39,7 +43,7 @@ describe('Hero', () => {
   it('renders one icon per category', () => {
     const { container } = render(<Hero />);
     const svgs = container.querySelectorAll('svg');
-    expect(svgs.length).toBe(2);
+    expect(svgs.length).toBe(3);
   });
 
   it('has proper semantic structure', () => {
