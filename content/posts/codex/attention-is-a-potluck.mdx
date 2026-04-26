@@ -4,8 +4,8 @@ date: "2026-04-18"
 description: "A tactile, phone-readable walkthrough of the single mechanism that makes every modern LLM actually understand language — no matrices first, no jargon, no mush."
 category: "Codex"
 tags: ["Attention", "Transformers", "LLM Fundamentals", "Self-Attention"]
-featured: true
-image: "/images/attention-is-a-potluck.png"
+featured: false
+image: "/images/attention-is-a-potluck-v2.png"
 author: "Akshay"
 readTime: "14 min read"
 series: "The Codex"
@@ -67,7 +67,7 @@ Your plate comes out as:
 - A small bite of apple pie — warm counts a little.
 - Barely a leaf of kale.
 
-![A single ceramic plate shown from above holding a deliberately imbalanced meal: about half the plate is a generous heap of Thai noodles with chilies, a quarter is butter chicken in orange tomato-cream gravy, a smaller wedge is apple pie, and a single kale leaf sits at the edge — the proportions tell the story of a weighted mix.](/images/potluck-weighted-plate.png)
+![A single ceramic plate shown from above holding a deliberately imbalanced meal: about half the plate is a generous heap of Thai noodles with chilies, a quarter is butter chicken in orange tomato-cream gravy, a smaller wedge is apple pie, and a single kale leaf sits at the edge — the proportions tell the story of a weighted mix.](/images/potluck-weighted-plate-v2.png)
 
 **That plate is the output of attention.** One plate, made from all four dishes, mixed in proportions set by your craving. Every dish contributes something. Even the kale. Nobody is fully taken. Nobody is fully ignored.
 
@@ -127,7 +127,7 @@ Same six words. Three roles each. All at once.
 
 This is why it's called **self**-attention. The guests and the dishes are the same people. The sentence is looking at itself.
 
-![Overhead view of a round wooden dining table with several place settings arranged evenly around it, each setting holding an empty plate. Bold amber curved lines sweep across the center of the table, connecting every seat to every other seat — a visible web of glances suggesting every word attending to every other word.](/images/self-attention-roundtable.png)
+![Overhead view of a round wooden dining table with several place settings arranged evenly around it, each setting holding an empty plate. Bold amber curved lines sweep across the center of the table, connecting every seat to every other seat — a visible web of glances suggesting every word attending to every other word.](/images/self-attention-roundtable-v2.png)
 
 ## What actually happens at the table
 
@@ -162,7 +162,7 @@ When *cat* walks into the room, it doesn't directly hand its word-identity to th
 - **Chef K** takes *cat* and turns it into *cat's label* — how cat *advertises itself* to other words.
 - **Chef V** takes *cat* and turns it into *cat's food* — what cat *contributes* when chosen.
 
-![Three small wooden chef stations arranged in a row in a warm kitchen doorway, each with a distinct implement — a puffy white chef's hat at the first (the craving), a stack of blank cards with a quill and inkwell at the second (the labels), and wooden serving utensils at the third (the food). No chefs visible, just the three stations bathed in warm amber light.](/images/three-chefs-entrance.png)
+![Three small wooden chef stations arranged in a row in a warm kitchen doorway, each with a distinct implement — a puffy white chef's hat at the first (the craving), a stack of blank cards with a quill and inkwell at the second (the labels), and wooden serving utensils at the third (the food). No chefs visible, just the three stations bathed in warm amber light.](/images/three-chefs-entrance-v2.png)
 
 Three different chefs. Three different transformations of the same starting word. The chefs are literally just learned matrices — the paper calls them $W^Q$, $W^K$, $W^V$ — and they **learn their recipes during training.** That's what training *is*. Over billions of examples, Chef Q learns to produce cravings that tend to match verb-labels and location-labels for noun-subjects like *cat*, because those are the cravings that produce plates that help the model predict the next word correctly.
 
