@@ -1,0 +1,160 @@
+---
+title: "The Seat Ribbons"
+date: "2026-04-19"
+description: "Self-attention treats a sentence as a bag of words with no order. The fix — the one that powered the original Transformer — was to blend a unique positional pattern into every word before the buffet."
+category: "Codex"
+tags: ["Positional Encoding", "Transformers", "Self-Attention", "LLM Fundamentals"]
+featured: true
+image: "/images/seat-ribbons-v3.png"
+author: "Akshay"
+readTime: "9 min read"
+series: "The Codex"
+lastModified: "2026-04-19"
+---
+
+*The cat sat on the mat.*
+
+*The mat sat on the cat.*
+
+Same six words. Totally different meaning. One is a Tuesday afternoon. The other is a horror film.
+
+Here's the uncomfortable part: self-attention, as I described it in [the last Codex entry](/posts/attention-is-a-potluck), **cannot tell these two sentences apart.**
+
+That's not a small bug. That's a disaster. If the mechanism underneath every 2026 LLM couldn't distinguish *dog bites man* from *man bites dog*, we'd be nowhere. And yet, if you read the 2017 *Attention Is All You Need* paper carefully, attention alone does exactly this failure. The fix is small, a little weird the first time you see it, and it's the reason this entry exists.
+
+> **Coming in cold?** Attention is a move where every word in a sentence builds a new version of itself by taking a weighted mix of every other word, with the weights set by how well its "craving" matches every other word's "label." If that sounds odd, [read this first](/posts/attention-is-a-potluck) — the potluck analogy explains the whole mechanism in one image. This entry assumes you've got that image in your head.
+
+## Self-attention forgot something important
+
+Walk back through the potluck for a second. Every word in the sentence shows up at the buffet simultaneously — each word is a **guest** with a craving, a **labeled dish** on the table, and a **food** behind the label. Every guest scores every label, softmaxes the scores into proportions, and builds a plate.
+
+Notice what's missing from that whole description.
+
+**Nowhere in the math does a word know where it's sitting.**
+
+*cat* doesn't know it's word #2. *mat* doesn't know it's word #6. The attention mechanism looks at the set of words, not the sequence of words. If you shuffle the sentence, every guest's plate comes out identical — same craving-label matches, same softmax, same weighted mix of foods.
+
+So *The cat sat on the mat* and *The mat sat on the cat* genuinely produce the same plates for every word. Word-for-word indistinguishable to the model.
+
+This is called a **permutation-invariant** system in the literature. I hate that phrase. The useful name is: **attention alone treats a sentence as a bag of words, not a sequence.** Pile, not line.
+
+Language is a line. Language is *entirely* a line. *Dog bites man* is Tuesday. *Man bites dog* is the front page. Every meaning we care about is encoded in order, and attention as I described it last time throws all of that away.
+
+## The fix, in one image
+
+Before anyone walks up to the buffet, the host hands each guest a **ribbon** to pin on their shirt. The ribbon has their **seat number** on it — not their name, not their craving, not what they're advertising. Just: *you are sitting in seat 2.*
+
+Six guests at a potluck. Six ribbons.
+
+![Six elegant fabric ribbons laid in a row on a warm wooden table, each in a distinct earthy color — honey, amber, ochre, terracotta, dusty rose, umber — and each woven with a subtly different wave pattern. Same length, same width, but every ribbon carries its own unique mark.](/images/ribbons-on-the-table-v4.png)
+
+- *The* gets ribbon **1**.
+- *cat* gets ribbon **2**.
+- *sat* gets ribbon **3**.
+- *on* gets ribbon **4**.
+- *the* gets ribbon **5**.
+- *mat* gets ribbon **6**.
+
+So far, so unsurprising.
+
+Here's the part that matters. The ribbon doesn't get pinned on top of the guest like a name tag, sitting beside them as metadata. The ribbon **gets blended into the guest.** Mixed in. Absorbed. *cat* is no longer just *cat* — *cat* becomes **cat-sitting-in-seat-2**. The positional information is no longer separate from the word; it's part of the word.
+
+When cat-in-seat-2 walks up to the buffet, its craving isn't *cat's craving*. It's *cat-in-seat-2's craving*. Its label isn't *cat's label*, it's *cat-in-seat-2's label*. Every downstream transformation — every chef Q, K, V, every attention layer, every plate — is already carrying position information baked in.
+
+This is what fixes the bag-of-words problem. When *cat-in-seat-2* scores *mat-in-seat-6*'s label, the score now reflects the **four-seat gap** between them. In the horror-film sentence, it's *cat-in-seat-6* scoring *mat-in-seat-2* — and that score is different, because the ribbons are different, so the plates come out different.
+
+**Order is no longer ignored. It's been smuggled into the words themselves before attention even starts.**
+
+That's positional encoding in one image. The name of the game is: make position part of the word.
+
+## Why not just write 1, 2, 3, 4?
+
+This is the first thing everyone tries. Just stamp the integer on the ribbon. Seat 1, seat 2, seat 3. Done.
+
+It fails for two reasons, and understanding both makes the sinusoidal trick feel inevitable rather than arbitrary.
+
+**Reason one: the numbers get huge.** Gemma 4's longest context window is 256,000 tokens. Imagine pinning "seat #173,482" on a guest. The ribbon alone carries a number larger than any value inside the actual word vector. When you blend that ribbon *into* the guest, position can dominate the signal — drowning out what the word actually is. That's the opposite of useful.
+
+You could normalize the integers — divide by max length, so seat #173,482 in a 256,000-token document becomes 0.678. Now the range is bounded. But that creates a second problem: the model has no idea how long the document is, so "0.678" in a short document and "0.678" in a long document mean completely different things.
+
+**Reason two: raw integers don't naturally encode distance.** What the model actually cares about is rarely "you're in seat 2, you're in seat 6." What it cares about is **"you're four seats apart."** Relative distance, not absolute position. Verbs attend to nearby subjects. Pronouns attend to recent nouns. Words at the end of a paragraph might attend to the beginning of the same paragraph.
+
+With raw integers, "distance" requires subtraction: seat 6 minus seat 2 equals 4. That's simple arithmetic, yes. But for the model to use this distance inside its attention math, the integers would need to interact through dot products, and two raw integers don't dot-product in any natural way that preserves the *gap* as the meaningful signal. The model ends up having to learn distance from scratch, layer by layer, from a representation that makes the job harder than it needs to be.
+
+So: the ribbons need to be **same-magnitude** (no giant numbers), **unique per seat** (so no two seats look identical), and **distance-aware** (so close seats naturally have similar ribbons and far seats have very different ones).
+
+Simple integers fail all three. The 2017 paper's solution passes all three.
+
+## The sinusoidal wave trick
+
+Instead of writing a single number on the ribbon, write a **pattern of wave values.**
+
+Imagine each ribbon has a row of dials on it — 512 dials, actually, matching the size of the word vector. Each dial is connected to a sine or cosine wave, but at a *different frequency*.
+
+- Some dials oscillate very fast — they complete a full cycle every 2 seats. Good for small-distance reasoning. Seat 1 and seat 2 look noticeably different; seat 1 and seat 3 look similar again.
+- Some dials oscillate very slowly — they take 10,000 seats to complete a single cycle. Good for large-distance reasoning. Seat 50 and seat 500 look very different on these dials.
+- Most dials are at frequencies in between, covering every scale of distance the model might care about.
+
+![A vertical stack of horizontal wave bands on a warm parchment background. The top band oscillates slowly — a single long, gentle wave. Each band below cycles faster than the one above it. By the bottom of the stack, the waves are dense and rapid. Each band in a different earthy hue — amber, ochre, sage, terracotta — flowing left to right across the page.](/images/wave-dials-v2.png)
+
+For any seat number, you read every dial's current position and stamp those values onto the ribbon. Because no two seats produce the exact same combination of wave values across 512 different frequencies, every ribbon is unique. But because seats close together share similar fast-wave values, their ribbons are *similar*. Seats far apart look very different on most waves. Distance is encoded naturally in how similar two ribbons are.
+
+The key property: when the model does its craving-dot-label match later in attention, the ribbon values contribute to the match in a way that preserves the *gap* between seats. Close guests naturally score higher on the position-aware part of the match. Far guests naturally score lower. Without anyone writing a rule that says so.
+
+Don't try to picture the math yet. Just hold this: **the ribbon is a pattern designed so that the difference between two ribbons encodes the distance between two seats.** That's the whole trick.
+
+## OK, the math
+
+We've done the whole picture without a single equation. Now the names.
+
+A word at position $pos$ in the sentence gets a positional encoding vector of the same length as its word vector (call that length $d_{model}$ — in the original paper, 512). Each dimension $i$ of that ribbon is computed as:
+
+$$
+PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+$$
+
+$$
+PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+$$
+
+Two formulas, one for even dimensions (sine), one for odd (cosine). The variable is $pos$ — your seat number. The constant 10000 sets the range of frequencies.
+
+Read it as: "For position $pos$, the $i$-th pair of dimensions oscillates at a frequency that depends on $i$." When $i=0$, the denominator is small, so $pos$ cycles very fast — that's your fine-grained distance dial. When $i=d_{model}/2$ (the last pair), the denominator is 10000, so $pos$ cycles very slowly — that's your coarse, long-range dial.
+
+Every position gets a unique vector. Every vector is bounded in magnitude (sine and cosine output between -1 and 1). Close positions share similar values on fast-frequency dials. Distant positions diverge on slow-frequency dials. Every property we wanted, in one formula.
+
+Then you just **add** this positional encoding vector to the word embedding vector, element by element. That's the blending-in step. Word vector plus position vector equals word-in-position vector. Hand that off to the attention mechanism, and it can't help but see position everywhere it looks.
+
+## The crack that eventually breaks it
+
+Sinusoidal positional encoding works. It shipped with the 2017 Transformer. It got the whole modern era started.
+
+It has one specific failure mode that didn't matter much in 2017 and matters enormously now: **it was only ever computed for positions the model saw during training.**
+
+If your training sequences were up to 512 tokens long, the model saw ribbons for seats 1 through 512. It learned what those ribbons mean. It learned how the craving-label math should behave when the ribbons are in that range.
+
+Now at inference, you feed it a 600-token document. Ribbon #513 is technically computable — you plug 513 into the formula and get a valid vector. But the model has *never seen that vector during training*. It hasn't learned how to interpret those positions reliably. Performance degrades — often catastrophically — past the training length.
+
+This is why, for years, context windows were basically a training decision. You trained at 512 tokens, you got 512 tokens. Want 2048? Retrain. Want 4096? Retrain, more expensive.
+
+**That crack is why every modern model moved to RoPE.** Llama, Mistral, Gemma 4, Qwen, DeepSeek — all of them — have replaced sinusoidal positional encoding with **Rotary Position Embedding**. RoPE doesn't hand each guest a fixed ribbon. It *rotates* the guest's craving and label vectors by an angle proportional to position. The rotation trick has a beautiful property: **it generalizes to distances the model never saw during training.** Hand RoPE a 128,000-token document after training on 8,000 tokens, and it still works reasonably well. This is why Gemma 4 can read a 256K-token document at all.
+
+That's a full Codex entry by itself — coming soon. For now, just know the direction: sinusoidal ribbons are the seat-ribbon idea in its first, simplest form. RoPE is the same idea with the right math bolted on so that long-context generalization becomes possible.
+
+## The whiteboard sentence
+
+If I could hand you one sentence to pin up:
+
+> **Attention alone is a bag of words. To make it a sequence, the model blends a unique pattern of sine and cosine waves — one per position — into every word *before* it reaches the buffet, so every downstream computation is already position-aware.**
+
+Seat ribbons. Blended in, not pinned on. Waves, not integers. Position baked into the word, from the very first layer.
+
+**Without ribbons, attention sees a pile. With them, it sees a sentence.**
+
+## What's next
+
+The Codex is a living notebook, and the next entry in it is **"Eight Friends at the Buffet"** — multi-head attention. Why running the potluck once isn't enough, and how running it eight times in parallel, with different specialized chefs, gives you eight independent opinions for the same parameter cost as one generalist. There's a single-line table in that post that makes most readers stop and re-check. It's one of the more beautiful ideas in the whole architecture.
+
+After that, RoPE gets its own dedicated entry. The rotation idea deserves room to breathe.
+
+If any part of this one was unclear — if the wave metaphor lost you, if the "blending in" vs "pinning on" distinction felt slippery — tell me. The Codex is supposed to stick in your head three weeks from now, not just feel clever today. If it doesn't stick, it's not written well enough yet.
