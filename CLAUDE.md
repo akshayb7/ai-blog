@@ -236,6 +236,34 @@ category subfolders and maps filename → slug. A post at
 5. Add images to `public/images/`
 6. Run `/content-repurposer` to generate LinkedIn / Twitter / Reddit variants
 7. Commit and push on a `content/<slug>` branch → open PR → merge to main
+8. **Vault sync** — write the corresponding distilled note in the Obsidian vault (see *Vault Sync* below). Do this in the same session, before `/handoff`.
+
+### Vault Sync (Mandatory Post-Publish Step)
+
+Every published post must have a corresponding distilled note in the personal Obsidian vault at `/Users/akshaybhardwaj/Documents/Repositories/my-brain-child/Blog/`. The vault is Akshay's reference layer — when he's reading a paper or building something later, the vault note is what surfaces, and the live URL is the deep dive.
+
+**When**: Immediately after the post is committed and pushed, in the same session, before `/handoff`. Do not defer.
+
+**Where**: `Blog/<Category>/<Title>.md` mirroring the blog category folder. Existing folders: `Codex/`, `Distributed-Systems/`, `AI-Image-Generation/`. Create new folders as new categories appear.
+
+**What the note must contain**:
+1. **Frontmatter** — `title`, `slug`, `url` (full live URL), `date` if relevant, `series` + `part` if applicable, `tags` (lowercase-hyphenated, drawn from the post's frontmatter tags).
+2. **Live URL** as the second line of the body — `**Live:** [<short-url>](<full-url>)`.
+3. **The image / central idea** — the analogy or thesis in 1-2 sentences. Not a paraphrase of the intro.
+4. **The map / shapes / numbers** — concrete tables, parameter counts, benchmarks, command syntax. The actual values, not "see post for details."
+5. **What's load-bearing** — gotchas, things that would only be known by running the code, surprising behavior the author would forget but want to recall.
+6. **Whiteboard sentence** (Codex entries especially) — the one-line takeaway.
+7. **Backlinks** — Obsidian-style `[[Note Name]]` to related notes (predecessors, sequels, siblings). Always update both directions when adding a new note.
+
+**Style rules**:
+- Terse. The vault note is a *reference card*, not a summary. If a section runs longer than the equivalent section in the post, it's wrong.
+- Prefer tables and bullet lists over prose.
+- Include actual numbers, not ranges with hand-waving.
+- No new analogies — match the post's vocabulary so backlinks compound.
+
+**Always update `Blog/_index.md`** when adding a new note: append to the relevant series section, and update the "Upcoming" list if the post resolves a TBD entry.
+
+**No filesystem hook for this.** It's a writing task with judgment, not a file sync. Do it by hand each time.
 
 ### Skills for Content
 
