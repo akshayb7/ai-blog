@@ -261,7 +261,7 @@ Every published post must have a corresponding distilled note in the personal Ob
 - Include actual numbers, not ranges with hand-waving.
 - No new analogies — match the post's vocabulary so backlinks compound.
 
-**Always update `Blog/_index.md`** when adding a new note: append to the relevant series section, and update the "Upcoming" list if the post resolves a TBD entry.
+**Always update the routing table `Blog/_LLM_Context.md`** when adding a new note: add a row under the matching series/category section (create a new H2 section if it's a new category), with a tight "Fetch when..." trigger, and update the "Upcoming" list if the post resolves a TBD entry.
 
 **No filesystem hook for this.** It's a writing task with judgment, not a file sync. Do it by hand each time.
 

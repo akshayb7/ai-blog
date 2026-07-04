@@ -2,15 +2,32 @@
 
 ## Current State
 
-**Active branch**: `content/eight-friends-at-the-buffet` — Codex Entry 3 drafted, three FLUX.1 Dev illustrations generated, ready to PR.
+**New post on branch `content/harness-engineering`, PR open, awaiting merge.** First entry in a new **AI Engineering** category.
 
 Live on production:
-- Entry 1: `/posts/attention-is-a-potluck`
-- Entry 2: `/posts/seat-ribbons`
+- Codex Entry 1: `/posts/attention-is-a-potluck`
+- Codex Entry 2: `/posts/seat-ribbons`
+- Codex Entry 3: `/posts/eight-friends-at-the-buffet`
 
-119 unit tests passing. Production build clean. Local server confirms Entry 3 prerenders.
+Pending merge:
+- AI Engineering #1: `/posts/harness-engineering` — "Harness Engineering: The Model Is Half the Car"
+
+119 unit tests passing. Production build clean (gate run pre-commit). Vault notes in sync (`my-brain-child/Blog/`).
 
 ## Recent Changes
+
+### 2026-07-05 — Session: Harness Engineering post + new AI Engineering category
+- **New post**: "Harness Engineering: The Model Is Half the Car" at `content/posts/ai-engineering/harness-engineering.mdx` (~2,300 words). Field notes; 2026 F1 analogy (LLM = engine/power unit; harness = context, verification, guardrails, removal). Four rungs: active aero → adaptive context (15KB→3.4KB CLAUDE.md trim); pit stop → verify-before-merge + JWT sanitizer; rulebook → 17-PR rate-limiter + `independent_review` flag; MGU-H → agentic-reviewer→curl removal. War stories mined from vault handoffs via Haiku subagents.
+- **New category "AI Engineering"** wired: hero pill (`lib/categories.js`, Wrench icon) + nav link (`Navigation.jsx`). Hero test updated for the 4th category. Featured slot moved Entry 3 → harness post (auto by date; flag flipped).
+- **3 FLUX.1 Dev images** (navy Red Bull-inspired, seeds 7010–7012; regenerated 3× to fix palette + strip real Shell/Red Bull logos + garbled text). Note: navy+red+yellow F1 scenes strongly pull real sponsor logos from FLUX — the "plain unbranded prototype" framing was needed.
+- **Cross-model review (2 rounds)** by Gemini + Codex — the post's own "pit wall." R1 caught a "cars are faster" factual error + engine/driver analogy inconsistency; R2 caught a "fastest package ever" overclaim + residual driver wobble. All fixed. Both models green post-fix.
+- Research + PROMPT at `research/harness-engineering/`. Vault note at `my-brain-child/Blog/AI-Engineering/Harness Engineering.md`; routing table `_LLM_Context.md` updated.
+
+### 2026-07-04 — Session: merge vault-sync + Entry 3
+- **Vault-sync workflow merged** (PR #25): CLAUDE.md § Vault Sync + `.claude/hooks/vault-sync-reminder.sh` (PostToolUse Bash hook that flags a published post with no vault note) + `.claude/settings.json`. Legacy local `.claude/handoffs/*` removed — handoffs are vault-only now (`ClaudeSessions/ai-blog-5fbf/`).
+- **Codex Entry 3 merged to main** (PR #23) — was stranded as an open PR since 2026-04-27. Verified 119/119 tests + clean production build on the merged tree before shipping.
+
+## Recent Changes (prior)
 
 ### 2026-04-27 — Session: Entry 3 launch (Eight Friends at the Buffet)
 - **Entry 3 drafted**: "Eight Friends at the Buffet" at `content/posts/codex/eight-friends-at-the-buffet.mdx`. Multi-head attention via the four-cravings-for-cat opening → eight buffet lines → 24 chefs → Master Chef ($W^O$). Centerpiece: the parameter-count table showing 1,048,576 params either way.

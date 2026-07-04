@@ -17,6 +17,7 @@ export default function Navigation({ posts = [] }) {
     { name: 'All Posts', href: '/posts' },
     { name: 'Codex', href: '/category/codex' },
     { name: 'GenAI', href: '/category/genai' },
+    { name: 'AI Engineering', href: '/category/ai-engineering' },
     { name: 'Distributed Systems', href: '/category/distributed-systems' },
     { name: 'About', href: '/about' },
   ];

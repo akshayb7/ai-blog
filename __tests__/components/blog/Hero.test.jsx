@@ -17,6 +17,7 @@ describe('Hero', () => {
     render(<Hero />);
     expect(screen.getByText('Codex')).toBeInTheDocument();
     expect(screen.getByText('GenAI')).toBeInTheDocument();
+    expect(screen.getByText('AI Engineering')).toBeInTheDocument();
     expect(screen.getByText('Distributed Systems')).toBeInTheDocument();
   });
 
@@ -36,6 +37,9 @@ describe('Hero', () => {
     const genAILink = screen.getByRole('link', { name: /GenAI/i });
     expect(genAILink).toHaveAttribute('href', '/category/genai');
 
+    const aiEngineeringLink = screen.getByRole('link', { name: /AI Engineering/i });
+    expect(aiEngineeringLink).toHaveAttribute('href', '/category/ai-engineering');
+
     const distributedSystemsLink = screen.getByRole('link', { name: /Distributed Systems/i });
     expect(distributedSystemsLink).toHaveAttribute('href', '/category/distributed-systems');
   });
@@ -43,7 +47,7 @@ describe('Hero', () => {
   it('renders one icon per category', () => {
     const { container } = render(<Hero />);
     const svgs = container.querySelectorAll('svg');
-    expect(svgs.length).toBe(3);
+    expect(svgs.length).toBe(4);
   });
 
   it('has proper semantic structure', () => {
