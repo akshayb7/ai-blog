@@ -28,10 +28,16 @@ missing=()
 while IFS= read -r f; do
   [[ -z "$f" ]] && continue
   category=$(basename "$(dirname "$f")")
-  # title-case each hyphen segment: distributed-systems -> Distributed-Systems
-  folder=$(echo "$category" | awk -F- 'BEGIN{OFS="-"} {for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}; print}')
+  # title-case each hyphen segment (distributed-systems -> Distributed-Systems),
+  # then restore the "AI" initialism (ai-engineering -> AI-Engineering, not Ai-Engineering).
+  folder=$(echo "$category" \
+    | awk -F- 'BEGIN{OFS="-"} {for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}; print}' \
+    | sed -E 's/(^|-)Ai(-|$)/\1AI\2/g')
   title=$(grep -m1 '^title:' "$f" | sed -E 's/^title:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/' | tr -d '"')
   [[ -z "$title" ]] && continue
+  # Vault notes use the short title; drop any ": subtitle" (also keeps colons out of filenames).
+  title=${title%%:*}
+  title=$(printf '%s' "$title" | sed -E 's/[[:space:]]+$//')
   vault_path="$VAULT_ROOT/$folder/$title.md"
   if [[ ! -f "$vault_path" ]]; then
     missing+=("$f -> $vault_path")
@@ -47,5 +53,5 @@ list=$(printf -- '- %s\n' "${missing[@]}")
 jq -n --arg ctx "VAULT SYNC REMINDER: The commit you just made added/modified blog post(s) without a corresponding vault note. Per CLAUDE.md § Vault Sync, write the distilled note(s) now (before /handoff). Missing:
 $list
 
-Also update Blog/_index.md with the new entry." \
+Also update the routing table Blog/_LLM_Context.md with the new entry." \
   '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $ctx}}'
