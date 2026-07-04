@@ -1,0 +1,157 @@
+---
+title: "Eight Friends at the Buffet"
+date: "2026-04-27"
+description: "One craving per word isn't enough. Multi-head attention sends eight specialized versions of every word to eight parallel buffets — and the whole upgrade is free, parameter for parameter, with one of the most beautiful tricks in the architecture."
+category: "Codex"
+tags: ["Multi-Head Attention", "Transformers", "Self-Attention", "LLM Fundamentals"]
+featured: true
+image: "/images/eight-friends-at-the-buffet.png"
+author: "Akshay"
+readTime: "10 min read"
+series: "The Codex"
+lastModified: "2026-04-27"
+---
+
+*Cat* walks up to the buffet with one craving in its head.
+
+Just one. The single-head attention move from [the first Codex entry](/posts/attention-is-a-potluck) gives every word exactly that — one craving to score every label against, one plate to walk away with.
+
+But hold the picture for a second. *Cat*, sitting in the middle of a sentence, simultaneously wants to know:
+
+- *Who's my verb?* (sat)
+- *Where am I?* (on the mat)
+- *Am I subject or object?* (subject, here)
+- *What's describing me?* (in another sentence: "the **fluffy** cat sat...")
+
+That's four different things to hunt for in the rest of the sentence. With only one craving to express all four, *cat* has to average them into a single gray compromise — *"something verb-ish and locational and adjectival and role-ish, please"* — softmax that against every label, and walk away with a plate that's vaguely useful for everything and sharply useful for nothing.
+
+> **Coming in cold?** Self-attention is the move where every word in a sentence builds a new version of itself by taking a weighted mix of every other word, with weights set by how well its **craving (Q)** matches every other word's **label (K)**, then mixing in their **food (V)**. If that doesn't ring a bell, [start here](/posts/attention-is-a-potluck) — this entry assumes you've got that picture in your head, plus the [seat ribbons](/posts/seat-ribbons) that bake position into every word.
+
+That averaging-into-mush problem is what multi-head attention fixes. And the fix is one of the most elegant tricks in the whole architecture.
+
+## Eight buffet lines, side by side
+
+Same potluck. Same sentence sitting at the table. But now there isn't one buffet — there are **eight buffet lines running in parallel**, side by side.
+
+Each word sends **eight specialized versions of itself** to the eight lines:
+
+- Line 1: *cat's verb-finding craving* — looking for action words.
+- Line 2: *cat's location-finding craving* — looking for "on the mat."
+- Line 3: *cat's subject/object craving* — looking for grammatical role cues.
+- Line 4: *cat's adjective-finding craving* — looking for words that describe me.
+- … and four more, each its own specialty.
+
+Labels are also eight versions per word. *Mat* advertises itself one way in Line 1 (where verbs and objects are the topic) and a completely different way in Line 4 (where adjectives matter). Foods, the same — eight foods per word, one per line.
+
+Each line runs a **complete potluck** at its own specialty. Eight cravings score eight sets of labels, eight softmaxes turn into eight sets of proportions, and out of each line walks a small plate. **Eight mini-plates per word**, side by side on a tray.
+
+![A top-down view of eight parallel buffet lines running side by side, each line a neat row of small earthy-toned dishes on a warm linen runner. The eight rows are visually identical in structure but the dishes within each row are subtly different — different garnishes, different sauces, different seasonings — emphasizing the eight specialized variations of the same potluck. Soft warm light from above, photorealistic editorial photography.](/images/eight-buffet-lines.png)
+
+That's the whole picture. One tray, eight plates, one word.
+
+## Where specialization comes from
+
+Here's the part that surprised me when I first sat with it: **nobody designs which line does what.**
+
+There's no engineer writing "Line 1 = verbs, Line 2 = location, Line 3 = grammar." The eight lines all start identical, randomly initialized, indistinguishable. Specialization **emerges during training** because specialists produce sharper plates than generalists, and sharper plates lead to better predictions, and gradient descent rewards whatever produced the better prediction.
+
+After enough training, the lines have drifted apart. Interpretability research on real models confirms it: some heads track grammar (subject→verb agreement), some track adjacent-word position, some latch onto rare words, some are **induction heads** that find "what came after this same token last time" and predict that next. (Most of what feels like in-context learning during inference traces back to induction heads, which is wild on its own.)
+
+The specialization wasn't engineered. The architecture made room for eight independent opinions and training filled them in.
+
+## Twenty-four chefs at the entrance
+
+Walk back through how a single word gets its Q, K, V. In the single-head world, three chefs at the entrance — **Chef Q, Chef K, Chef V** — each with their own learned recipe, translate the word into a craving, a label, and a food.
+
+Multi-head changes the staffing.
+
+> **Eight specialized buffet lines means twenty-four chefs at the entrance, not three.**
+
+Eight Chef-Q's. Eight Chef-K's. Eight Chef-V's. Each set drifts into its own specialty during training. Chef-Q-Line-1 learns to write verb-shaped cravings. Chef-Q-Line-2 learns location-shaped cravings. And so on for K's and V's. The entrance to the potluck is a much bigger kitchen than it was.
+
+When *cat* arrives, all twenty-four chefs work on it in parallel. *Cat* gets converted into eight different cravings, eight different labels, eight different foods — one set per line. Then it splits and walks into all eight lines at once.
+
+## The Master Chef pulls the tray together
+
+Eight mini-plates per word is *progress*, not the answer.
+
+The next layer of the model — the next room in the hallway, in the language we'll get to in the next entry — doesn't want a tray of eight segregated plates. It wants **one cohesive plate** to work from. If you handed it the unblended tray, it'd see eight rigid silos: jalapeños in one corner, chocolate cake in another, kale somewhere else, none of them aware of each other.
+
+The fix is the **Master Chef**, formally called the output projection $W^O$.
+
+The Master Chef takes the tray of eight mini-plates and blends them into one final plate. Not by averaging — by *learning* how to mix them. Some of Line 1's verb-finding output gets poured into the part of the final plate that informs grammar. Some of Line 3's location-finding output gets routed wherever spatial reasoning lives. The Master Chef's recipe is also learned during training — it's a single matrix, $W^O$, that says *here's how to combine eight specialist opinions into one integrated answer.*
+
+Without the Master Chef, multi-head is broken — the next room sees silos, not understanding. With it, the next room sees a unified plate that secretly carries all eight specialist signatures inside it.
+
+![A wooden serving tray on a warm kitchen counter holding eight small porcelain plates arranged in a neat grid, each carrying a different small portion in earthy colors. Beside the tray sits one larger plate where a chef's hands carefully transfer elements from each small plate, blending the eight specialist contributions into one cohesive composition. Warm natural light, photorealistic editorial photography capturing the moment of synthesis.](/images/master-chef-tray.png)
+
+## The free lunch — and yes it really is free
+
+Here's the part most people I've talked to don't quite believe the first time they see it.
+
+**Eight parallel buffets cost the same as one big buffet. Identical parameter count. Same training cost. Same inference cost.**
+
+When I first read this in 2017's *Attention Is All You Need*, I had to grab a piece of paper. Let me put the math right next to it because the table is the whole "aha":
+
+| | Single head, $d_{model}=512$ | 8 heads × $d_k=64$ |
+|---|---|---|
+| $W^Q$ | 512 × 512 = 262,144 | 8 × (512 × 64) = 262,144 |
+| $W^K$ | 262,144 | 262,144 |
+| $W^V$ | 262,144 | 262,144 |
+| $W^O$ | 262,144 | 262,144 |
+| **Total** | **1,048,576** | **1,048,576** |
+
+Read that bottom row twice. **One million and forty-eight thousand parameters either way.** The eight-headed setup uses the *same* total parameter budget as the single-headed one — it just slices the budget into eight smaller, specialized chunks.
+
+The trick: each of the eight lines works in a smaller flavor-space. Not 512 dimensions, but 64. Eight × 64 = 512. Same total chef-work distributed across eight specialists instead of concentrated in one generalist. The chefs are smaller, but you have eight times as many of them, and the totals match exactly.
+
+You went from one averaged opinion to eight independent specialist opinions, **for free.**
+
+## How the math actually runs in production
+
+The 2017 paper presented multi-head as eight separate small projections — eight (512 × 64) matrices for Q, eight more for K, eight more for V. Mathematically clean. *Physically* a bit silly: doing eight small matrix multiplications when GPUs are happiest with one big one is leaving performance on the floor.
+
+Every modern implementation — PyTorch's `nn.MultiheadAttention`, every production LLM you've used — does this instead:
+
+1. **One fat matrix per role.** A single 512 × 512 $W^Q$ instead of eight 512 × 64s. Same for $W^K$ and $W^V$. (Multiply 8 × 512 × 64 — yes, that's 512 × 512.)
+2. **One projection.** Multiply the input by $W^Q$ once. Same for K and V. Three big matmuls total.
+3. **Reshape, don't re-project.** Take the resulting matrix and *split* it into eight chunks of 64 dimensions each. No new computation — the same numbers, just viewed as eight side-by-side strips.
+4. **Run attention per chunk.** Eight parallel softmaxes, eight independent buffets, no interaction across chunks at this stage.
+5. **Concatenate and project through $W^O$.** Stack the eight 64-dim outputs back into a 512-dim row and pass through the Master Chef.
+
+Mathematically identical to the paper's formulation. Computationally, it's three big matmuls instead of twenty-four small ones. GPUs love this.
+
+## The shapes, end to end
+
+If you find shapes more reassuring than analogies — I do, by reflex — here's what every tensor looks like for a sequence of $n=10$ tokens, $d_{model}=512$, $h=8$ heads:
+
+```
+X:              10 × 512       input tokens (with seat ribbons baked in)
+Q, K, V:        10 × 512       after one big projection per role
+Q_i, K_i, V_i:  10 × 64        per head, after the reshape — 8 of these
+Q_i K_iᵀ:       10 × 10        attention scores, per head
+softmax:        10 × 10        per head
+head_i out:     10 × 64        softmax @ V_i, per head
+concat:         10 × 512       8 plates laid on the tray
+final:          10 × 512       after W^O — the Master Chef's plate
+```
+
+The output rejoins the same dimensionality as the input, $10 \times 512$, ready to flow into the next room of the hallway. **Multi-head doesn't change the shape of the river. It changes what's dissolved in it.**
+
+## The whiteboard sentence
+
+If I could hand you one sentence to pin up:
+
+> **Multi-head attention runs the potluck eight times in parallel, with eight specialist cravings per word, and blends the eight resulting mini-plates into one integrated plate — for the same total parameter count as a single generalist head.**
+
+Eight friends at the buffet, each hunting something different, all coming back to compare notes through the Master Chef.
+
+**One craving averages. Eight cravings disambiguate.**
+
+## What's next
+
+The Codex is a living notebook, and the next entry pulls back to ask: *now that one block does all this beautiful work, why do real models have forty-eight of them?* That's **"The Express Lane"** — stacking transformer blocks, residual connections, and the question that bothered me until someone drew it out: when a word leaves Block 1 and walks into Block 2, what exactly does Block 2 see? (Spoiler: nothing is inherited. Every block grows its own chefs from scratch. The hierarchy that emerges across forty-eight blocks isn't designed — it falls out of statistics.)
+
+After that, RoPE gets its own dedicated entry — the rotation trick that lets modern models read 256K-token documents from 8K-token training.
+
+If any part of this one was unclear — if the Master Chef felt hand-wavy, if the parameter table didn't quite click on first read — tell me. The Codex is supposed to stick three weeks later, not just feel clever today.
