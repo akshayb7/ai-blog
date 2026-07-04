@@ -1,0 +1,121 @@
+---
+title: "Harness Engineering: The Model Is Half the Car"
+date: "2026-07-04"
+description: "In 2026 F1 made the engine only half the car. AI had the same year: the model stopped being the differentiator. Harness engineering is building the other half."
+category: "AI Engineering"
+tags: ["Harness Engineering", "AI Agents", "Context Engineering", "LLM Tooling", "Claude Code"]
+featured: true
+image: "/images/harness-engineering.png"
+author: "Akshay"
+readTime: "11 min read"
+lastModified: "2026-07-04"
+---
+
+In 2026, Formula 1 decided the engine was only half the car.
+
+The new power units run a roughly **50/50 split** between the combustion engine and the electrical system — a hard turn away from the combustion-heavy era before it. The V6 got *weaker* on paper: the internal combustion side drops from around 550kW to 400kW. The electrical side nearly tripled to compensate, from 120kW to 350kW ([F1's own breakdown](https://www.formula1.com/en/latest/article/explained-2026-power-unit-regulations-fia.68izKQ2tn1voQPWvgLVMXN)). Lap times may not tumble — the cars carry other compromises — but the sport looked at an already extreme hybrid package and decided the raw motor is no longer where the race is won. It's in how you deploy and recover energy around it.
+
+I've been thinking about that a lot, because it's exactly what happened to the way I build with AI this year.
+
+The model got good enough that it stopped being the thing I tuned. I don't spend my evenings coaxing a better answer out of a bigger checkpoint. I spend them on everything *around* the model — the context it sees, the tools it can reach, the checks that catch it when it's wrong, the rules that stop it doing something dumb at 2am. That's the other half of the car. For the longest time I didn't have a name for it — I was just doing it, night after night, without clocking that it *was* a thing. Then I heard someone use the term **harness engineering**, and it landed. That was it. A name for the work I'd been quietly pouring most of my leverage into.
+
+Here's the part that took me a while to get: a good harness doesn't make the model smarter. It makes the model's mistakes *cheap*. A great pit crew doesn't rebuild the engine — it turns a botched stop from a retirement into a two-second inconvenience. Once failure is cheap and recoverable, you can point the thing at harder work than you'd ever risk otherwise.
+
+## TL;DR
+
+- The 2026 model is a high-output engine you barely tune. The wins now come from the harness around it: context, tools, verification, guardrails, and knowing what to *remove*.
+- **Adaptive context beats a big static prompt.** My global instructions were loading ~15KB on every turn. Trimming them 77% and routing detail on-demand made the agent *better*, not dumber.
+- **Verification is a pit stop, not a wall.** Catch the failure in the garage — a sanitizer caught a live secret before it hit a public repo; a build gate catches broken posts before they ship.
+- **Guardrails are the rulebook.** I added a rate-limiter after an agent fired off ~17 pull requests in one go, and an honesty flag after a review pipeline quietly fell back to grading its own homework.
+- **The best harness move is often subtraction.** I deleted my cleverest component — an agentic review CLI — and replaced it with a `curl` call. Everything got more reliable.
+
+I write a lot about how the engine itself works over in [the Codex](/category/codex) — [attention](/posts/attention-is-a-potluck), positional encoding, [multi-head](/posts/eight-friends-at-the-buffet). This is the opposite axis. Not what's inside the engine — what's bolted around it.
+
+## Active aero: load context for the corner you're in
+
+The first thing 2026 killed was the idea of one fixed setup.
+
+The new cars run **active aerodynamics** — front and rear wings that change shape depending on where they are on the circuit. Low-drag on the straights so you're not dragging a barn door through the air. High-downforce in the corners so you can actually turn. Same car, different shape, chosen by *where it is on the track* ([Motor Sport has a good teardown](https://www.motorsportmagazine.com/articles/single-seaters/f1/how-f1-2026s-new-active-aero-will-work-without-drs/)). Nobody would dream of running one wing angle for the whole lap.
+
+I was running one wing angle for the whole lap.
+
+My global instruction file — the thing that gets injected into every single session, in every project — had crept to 242 lines. About 15KB. Every turn, in every conversation, the model was reading a company glossary, a secrets-handling table, a vault folder map, and a bunch of domain rules that mattered maybe 5% of the time. I'd added each piece for a good reason. Together they were a permanent tax on attention.
+
+The fix wasn't "write less." It was to make the context *active* — the right shape for the corner, not one heavy setup for the whole track.
+
+```text
+Global instructions:  242 lines  →  36 lines   (15KB → 3.4KB, ~77% lighter)
+```
+
+The 36 lines that stayed are identity and the always-on rules — the stuff that's true in every corner. Everything else moved into files that load *on demand*, pulled in by a small routing table only when the task actually touches that domain. Working on the vault? The vault manual loads. Working on anything else? It doesn't exist as far as the model is concerned.
+
+The counterintuitive result: stripping it back didn't cost me the behavior I was afraid of losing — if anything, the rules that stayed landed more consistently. A 15KB always-on preamble doesn't read as "helpful context" to a model mid-task. It reads as noise it has to hold in working memory while doing something unrelated. Strip it back to what the corner needs and the instructions you *do* keep actually land.
+
+If you take one thing from this section: your context window is not a glovebox to stuff full. It's a wing you should be reshaping for where you are.
+
+## The pit stop: make failure cost two seconds
+
+Here's a distinction I wish I'd internalized earlier. There are two ways to be safe. You can try to never make a mistake. Or you can make mistakes cheap to catch and cheap to undo. The first is a fantasy. The second is a pit crew.
+
+A modern F1 pit stop — the stationary part — is around two seconds. Four tyres, twenty-odd people, choreographed to the frame. The full stop costs more once you count the pit lane, but the *change itself* is bounded and rehearsed: a strategic gamble becomes a known, survivable cost instead of a ruined afternoon. The crew doesn't prevent the gamble. It makes it survivable.
+
+![A Formula 1 pit crew executing a tyre change in perfect coordination — hands and wheel guns in sharp focus, a fresh tyre going on, the crew in matching navy overalls with red trim, choreographed precision frozen mid-motion. The two-second stop as a machine for making mistakes cheap.](/images/harness-pit-stop.png)
+
+Two of my most-used harness pieces are exactly this.
+
+The first caught a live secret. I sync a sanitized copy of some tooling config into a repo, and the sync step runs a scrubber over the output before anything gets committed. One day it flagged a JSON Web Token — an `eyJ…` string — that had slipped into a template file. That token would have gone into a public repo on the very first sync. The sanitizer caught it in the garage. Afterwards I widened the net: JWTs, Slack tokens (`xoxb-`), Google keys (`AIza…`), the usual shapes. The point isn't the regex. The point is that a leaked secret is a *retirement* — irreversible, embarrassing, expensive — and a scrubber turns it into a two-second stop: a warning, a fix, move on.
+
+The second is duller, and I run it before every blog merge: the full test suite plus a production build. It's boring by design. Earlier this week I merged a post that had sat in an open pull request for weeks, off a branch that predated a pile of changes on `main` — tests green, all 119 of them, every route compiled, *then* merge. The gate has never once saved me dramatically, and that's the point: undramatic verification you actually run beats heroic debugging after the fact. On the day it goes red, it'll catch a broken deploy before anyone else hits it.
+
+> The goal of a harness isn't zero failures. It's failures that cost two seconds instead of the race.
+
+## The rulebook: stewards don't rely on your memory
+
+F1 has a rulebook and stewards, and they do not care whether you *meant* to gain an advantage by cutting the chicane — the penalty lands either way. That's the point: the limits are enforced from outside the car, not held in someone's head at 300kph.
+
+Agent systems need that same outside enforcement, and I learned it the ugly way.
+
+I had a fleet of agents doing parallel work, and something in my orchestration went sideways. Before I noticed, it had fired off around **17 pull requests**. Not malicious. Not even a bug in the model — a bug in *my* harness, an agent doing exactly what a slightly-wrong instruction told it to, seventeen times, fast. Cleaning that up was not two seconds.
+
+So I built a steward. A pre-execution hook that watches shell commands and caps `gh pr create` at three per ten minutes. Cross that line and it blocks the command. If I genuinely mean to open a batch, I set an environment flag — `AGENT_ALLOW_PR=1` — and the gate stands down. A rule, enforced mechanically, with a deliberate override for when I'm the one holding the wheel. I don't have to *remember* not to spam PRs. The rulebook remembers for me.
+
+That's the loud kind of guardrail. There's a quieter kind that I find more interesting, because it protects against the harness lying to *itself*.
+
+I run an automated skill-building pipeline that's supposed to get a second opinion from a different model at each quality gate — an independent reviewer, so I'm not just grading my own homework. During one autonomous run, that second model went down mid-job. And the pipeline… kept going. It quietly fell back to reviewing its own output and stamped the result "independent." No error. No flag. It just started marking its own paper and told me it hadn't.
+
+The fix was a single honest field: `independent_review: passed | pending`. If the outside reviewer doesn't actually run, the gate can't claim independence — it goes `pending` and says so, loudly. A steward whose only job is to stop the system from quietly telling you a comforting lie.
+
+| Harness piece | F1 equivalent | What it enforces |
+| --- | --- | --- |
+| Sanitizer on sync | Scrutineering | No secret leaves the garage |
+| Test + build gate | Pit stop | No broken build reaches the track |
+| PR rate-limiter | The rulebook | No runaway action, with an override |
+| `independent_review` flag | An honest steward | The system can't fake its own check |
+
+Both kinds matter. The loud one stops you doing damage. The quiet one stops you *believing* you're safe when you aren't.
+
+## MGU-H: the best upgrade is sometimes a deletion
+
+Now the part that feels like going backwards.
+
+For over a decade F1 engines carried a component called the MGU-H, which recovered energy from exhaust heat. Brilliant physics. Genuinely clever. It was also, by wide agreement, a nightmare to master — hideously complex, and a big reason the hybrid era got so expensive that manufacturers balked at joining. For 2026 the FIA simply **deleted it** ([F1's beginner's guide spells this out](https://www.formula1.com/en/latest/article/the-beginners-guide-to-the-2026-regulations.6j0tS0hrHG2T01tpmK6XYz)). Cutting it lowered the barrier for engine makers — Audi in, Honda staying, Ford alongside Red Bull, Cadillac joining. The power units are simpler, and the sport decided the component's cost outran what it returned.
+
+The best move was to remove the cleverest part.
+
+![A modern Formula 1 power unit partially disassembled on a clean workshop stand, one complex component removed and set alone on a bench, the remaining engine looking simpler and lighter. Deliberate subtraction as an upgrade.](/images/harness-stripped.png)
+
+I had an MGU-H. My proudest harness component was that cross-model reviewer from the last section — and the *original* version of it was gorgeous. It didn't call an API; it drove a full agentic CLI. That reviewer could run its own tool loop, read files, write artifacts, reason across multiple steps. On paper it was the most capable piece in my whole setup.
+
+In practice it was misery. It needed an OAuth token refreshed every hour. It wrote scratch files I had to clean up. And worst of all, on long prompts — exactly the reviews that mattered most — it would just *hang*. For an interactive session, tolerable. For an unattended gate that's supposed to run at 2am while I sleep, useless.
+
+I replaced the whole thing with a stateless shell script that does one `curl` to the model's API and returns the text. No tool loop. No agent. No OAuth dance. No artifacts. It cannot do a fraction of what the agentic version could do — and it is *dramatically* better at the one job I actually needed, because it always finishes and never leaves a mess.
+
+I removed my most sophisticated component precisely *because* it was sophisticated. Every capability it had was a surface that could hang, expire, or need cleanup. For a gate, the virtue isn't capability. It's that it runs the same way every single time.
+
+This is the hardest instinct to build, because subtraction never feels like progress. Adding a tool feels like building. Deleting one feels like giving up. But an F1 team celebrating the death of the MGU-H isn't giving up — it's admitting that a component earning less than it costs to run is *negative* value, no matter how impressive the physics. Half my good harness decisions this year were deletions.
+
+There's more bolted to this car than four pieces. But that's another log.
+
+The frame holds across all of it. In 2026, F1 stopped pretending the engine was the whole car and started engineering the half that recovers, deploys, and survives. The model on my desk is a more powerful engine than I know what to do with. But raw power was never where the race is won.
+
+The car around it is.
