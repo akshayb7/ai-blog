@@ -50,7 +50,7 @@ fi
 
 list=$(printf -- '- %s\n' "${missing[@]}")
 # Emit additionalContext via JSON so Claude sees the reminder.
-jq -n --arg ctx "VAULT SYNC REMINDER: The commit you just made added/modified blog post(s) without a corresponding vault note. Per CLAUDE.md § Vault Sync, write the distilled note(s) now (before /handoff). Missing:
+jq -n --arg ctx "VAULT SYNC REMINDER: The commit you just made added/modified blog post(s) without a corresponding vault note. Per AGENTS.md § Vault Sync, write the distilled note(s) now (before /handoff). Missing:
 $list
 
 Also update the routing table Blog/_LLM_Context.md with the new entry." \
