@@ -23,20 +23,22 @@ ai-blog/
 ├── app/                             # Next.js App Router
 │   ├── layout.js                    # Root layout — fonts, metadata, ThemeProvider
 │   ├── page.js                      # Homepage — Hero, FeaturedPost, RecentPosts, Newsletter
+│   ├── favicon.ico
 │   ├── globals.css                  # Global styles, .glass / .glass-card utilities
 │   ├── about/page.js                # About page
 │   ├── posts/[slug]/page.js         # Individual post page — MDX rendering, ToC, ReadingProgress
 │   ├── category/[category]/page.js  # Category listing page
 │   ├── posts/page.js                # All posts listing
-│   ├── og/route.js                  # Dynamic OG image generation (@vercel/og)
+│   ├── og/route.tsx                 # Dynamic OG image generation (@vercel/og)
 │   ├── sitemap.ts                   # Auto-generated sitemap
 │   ├── robots.ts                    # robots.txt
-│   └── feed.xml/                    # RSS feed
+│   └── feed.xml/route.ts            # RSS feed
 │
 ├── components/
+│   ├── ThemeProvider.jsx            # next-themes provider (client)
 │   ├── blog/                        # All page-level components
-│   │   ├── Navigation.jsx           # Fixed glassmorphic nav, search (⌘K), mobile menu
-│   │   ├── Hero.jsx                 # Homepage hero — h1 + category pills
+│   │   ├── Navigation.jsx           # Fixed glassmorphic nav, search (⌘K), theme toggle, mobile menu
+│   │   ├── Hero.jsx                 # Homepage hero — h1 + category pills (from lib/categories.js)
 │   │   ├── FeaturedPost.jsx         # Full-width featured card with image overlay
 │   │   ├── RecentPosts.jsx          # 3-column post grid
 │   │   ├── PostCard.jsx             # Individual card in the grid
@@ -59,10 +61,14 @@ ai-blog/
 ├── content/
 │   └── posts/                       # All MDX blog posts — organized by category folder
 │       ├── distributed-systems/     # Ray series and distributed systems posts
-│       └── ai-image-generation/     # Local image gen series
+│       ├── ai-image-generation/     # Local image gen series (frontmatter category: GenAI)
+│       ├── ai-engineering/          # AI Engineering posts
+│       └── codex/                   # The Codex series
 │
 ├── lib/
-│   └── posts.js                     # Post loading — getAllPosts, getPostBySlug, getFeaturedPost
+│   ├── posts.js                     # Post loading — getAllPosts, getPostBySlug, getFeaturedPost, getPostsByCategory
+│   ├── categories.js                # featuredCategories — source of truth for Hero category pills
+│   └── utils.ts                     # cn() class-name helper
 │
 ├── public/
 │   └── images/                      # All blog images (hero, post images, demos)
@@ -72,13 +78,17 @@ ai-blog/
 │       ├── research.md              # Raw research notes
 │       └── PROMPT.md                # Writing instructions for the blog-writer skill
 │
-├── hooks/                           # React hooks
+├── hooks/                           # React hooks (useSearch.js)
 │
 ├── __tests__/                       # Vitest unit tests
 ├── e2e/                             # Playwright end-to-end tests
+├── docs/agent-reference/            # Long reference moved out of this file (series status, distribution)
 │
 ├── tailwind.config.js               # Tailwind config — typography plugin, dark mode
 ├── next.config.mjs                  # Next.js config
+├── vitest.config.mts                # Vitest config (jsdom, coverage via v8)
+├── playwright.config.ts             # Playwright config
+├── eslint.config.mjs                # ESLint config
 └── mdx-components.jsx               # MDX component overrides
 ```
 
@@ -143,7 +153,7 @@ npm run build
 - **shadcn/ui first** — use or extend shadcn primitives before building anything custom.
   If it's in the shadcn registry, use it.
 - **No hardcoded nav links or category lists** in components — derive from data or lib functions.
-  (The Hero category pills being hardcoded is a known issue to fix.)
+  Hero pills already derive from `lib/categories.js`; `navLinks` in `Navigation.jsx` is still a hardcoded array.
 - **No `console.log` in production components** — remove before committing.
 - **No non-functional UI** — a newsletter with `alert('coming soon!')` ships nothing. Either
   integrate it or remove it.
@@ -168,7 +178,7 @@ Every post must have these fields:
 title: "Full post title in quotes"
 date: "YYYY-MM-DD"
 description: "1-2 sentence description used in cards, SEO, and OG images"
-category: "Distributed Systems"        # Must match a real nav category
+category: "Distributed Systems"        # Must match a real nav category (slug = lowercased, hyphenated)
 tags: ["Tag1", "Tag2", "Tag3"]         # 3-6 tags, TitleCase
 featured: false                         # true for the homepage featured slot — only 1 post at a time
 image: "/images/your-image.png"         # Required. OG image + card thumbnail. 1200×630 recommended.
@@ -181,13 +191,17 @@ seriesPart: 1                          # Optional — series index number
 
 ### Post Organization
 
-Posts live in `content/posts/<category-slug>/` where `category-slug` matches the URL pattern
-used in the nav:
+Posts live in `content/posts/<folder>/`. The folder is organisational only. The category URL
+comes from the frontmatter `category` (lowercased, spaces to hyphens: `/category/<slug>`), so a
+folder name and its category slug can differ. **Source of truth for Hero category pills:
+`lib/categories.js`** (`featuredCategories`). Current state:
 
-| Category Name | Folder | Nav URL |
+| Frontmatter category | Folder | Category URL |
 |---|---|---|
 | Distributed Systems | `content/posts/distributed-systems/` | `/category/distributed-systems` |
-| AI Image Generation | `content/posts/ai-image-generation/` | `/category/ai-image-generation` |
+| GenAI | `content/posts/ai-image-generation/` | `/category/genai` |
+| AI Engineering | `content/posts/ai-engineering/` | `/category/ai-engineering` |
+| Codex | `content/posts/codex/` | `/category/codex` |
 
 **Slug = filename** (without `.mdx`). The `lib/posts.js` loader recursively scans all
 category subfolders and maps filename → slug. A post at
@@ -219,7 +233,7 @@ Every published post must have a corresponding distilled note in the personal Ob
 
 **When**: Immediately after the post is committed and pushed, in the same session, before `/handoff`. Do not defer.
 
-**Where**: `Blog/<Category>/<Title>.md` mirroring the blog category folder. Existing folders: `Codex/`, `Distributed-Systems/`, `AI-Image-Generation/`. Create new folders as new categories appear.
+**Where**: `Blog/<Category>/<Title>.md` mirroring the blog category folder. Existing folders: `AI-Engineering/`, `Codex/`, `Distributed-Systems/`, `AI-Image-Generation/`. Create new folders as new categories appear.
 
 **What the note must contain**:
 1. **Frontmatter** — `title`, `slug`, `url` (full live URL), `date` if relevant, `series` + `part` if applicable, `tags` (lowercase-hyphenated, drawn from the post's frontmatter tags).
@@ -261,8 +275,10 @@ Platform-by-platform posting rules (LinkedIn, Twitter/X, Reddit, HN, RSS) live i
 
 - **One component per file** in `components/blog/`
 - **PascalCase** filenames: `FeaturedPost.jsx`, `TableOfContents.jsx`
-- **`'use client'` only when needed**: Navigation, SearchModal, Newsletter, ReadingProgress,
-  TableOfContents are client. Most else should be server.
+- **`'use client'` only when needed**: currently client: Navigation, SearchModal, Newsletter,
+  ReadingProgress, TableOfContents, Comments, CodeBlock, MDXImage, PerformanceMonitor, ThemeProvider.
+  Everything else (Hero, FeaturedPost, RecentPosts, PostCard, Footer) is server. Verify with
+  `grep -l "use client" components/blog/*.jsx`.
 - **shadcn from `components/ui/`**: Card, Badge, Button are the active primitives.
   Add new shadcn components via `npx shadcn@latest add <component>`.
 
@@ -281,18 +297,10 @@ All pages follow the same shell:
 ### Navigation
 
 Nav links must reflect **actual content categories** only. Never add a nav link for a category
-that has no posts. Current live nav links:
-
-```js
-const navLinks = [
-  { name: 'All Posts', href: '/posts' },
-  { name: 'Image Generation', href: '/category/ai-image-generation' },
-  { name: 'Distributed Systems', href: '/category/distributed-systems' },
-  { name: 'About', href: '/about' },
-];
-```
-
-Update this list whenever a new category has at least 1 published post.
+that has no posts. The live list is the `navLinks` array in `components/blog/Navigation.jsx`
+(All Posts, Codex, GenAI, AI Engineering, Distributed Systems, About). Read the file rather than
+trusting a copy here. Update it, and `lib/categories.js` for the Hero pills, whenever a new
+category has at least 1 published post.
 
 ---
 
