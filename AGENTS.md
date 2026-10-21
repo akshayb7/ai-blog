@@ -236,11 +236,8 @@ Every published post must have a corresponding distilled note in the personal Ob
 
 ### Distribution Strategy
 
-- **LinkedIn**: Link in profile, never in post body. Wednesday 10am. Understated close.
-- **Twitter/X**: 5-tweet thread + link reply.
-- **Reddit (r/LocalLLaMA)**: Native self-post, link at bottom. Technical content only.
-- **HN**: Wait for posts with deep technical novelty. Wednesday 8am EST.
-- **RSS**: Feed at `/feed.xml` — already live and generated.
+Platform-by-platform posting rules (LinkedIn, Twitter/X, Reddit, HN, RSS) live in
+`docs/agent-reference/distribution-strategy.md`. Read it when promoting a published post.
 
 ---
 
