@@ -141,7 +141,7 @@ npm run build
 - **Any new component gets a test file alongside it** — not after, alongside.
 - **Do not lower coverage.** Check with `npm run test:coverage` before and after your change. PRs that reduce coverage need an explicit reason.
 - **E2e tests** (`npm run test:e2e`) require a running build. Run them before merging significant layout or navigation changes — they catch regressions that unit tests miss.
-- **Known FlexSearch issue**: `useSearch.jsx` tests are excluded from vitest (`__tests__/unit/hooks/useSearch.test.jsx`) because FlexSearch causes memory issues in jsdom. Covered by e2e `search.spec.ts` instead.
+- **Known FlexSearch issue**: `hooks/useSearch.js` tests are excluded from vitest (`__tests__/unit/hooks/useSearch.test.jsx`) because FlexSearch causes memory issues in jsdom. Covered by e2e `search.spec.ts` instead.
 - **Test files location**:
   - Unit tests: `__tests__/components/blog/` and `__tests__/components/ui/` mirroring `components/`
   - Lib tests: `__tests__/unit/lib/`
@@ -229,7 +229,7 @@ category subfolders and maps filename → slug. A post at
 
 ### Vault Sync (Mandatory Post-Publish Step)
 
-Every published post must have a corresponding distilled note in the personal Obsidian vault at `/Users/akshaybhardwaj/Documents/Repositories/my-brain-child/Blog/`. The vault is Akshay's reference layer — when he's reading a paper or building something later, the vault note is what surfaces, and the live URL is the deep dive.
+Every published post must have a corresponding distilled note in the personal Obsidian vault at `~/Documents/Repositories/my-brain-child/Blog/`. The vault is Akshay's reference layer — when he's reading a paper or building something later, the vault note is what surfaces, and the live URL is the deep dive.
 
 **When**: Immediately after the post is committed and pushed, in the same session, before `/handoff`. Do not defer.
 
