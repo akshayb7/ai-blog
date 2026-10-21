@@ -97,6 +97,12 @@ npm run dev
 # Run unit tests
 npm test
 
+# Run unit tests once with a coverage report
+npm run test:coverage
+
+# Lint
+npm run lint
+
 # Run e2e tests
 npm run test:e2e
 
@@ -120,10 +126,10 @@ npm run build
 - Branch naming: `content/<post-slug>`, `feat/<feature-name>`, `chore/<task>`
 
 ### Testing
-- **Run `npm test` before every commit.** All 117 unit tests must stay green. Never commit a red suite.
+- **Run `npm test` before every commit.** The whole unit suite must stay green. Never commit a red suite.
 - **Any component you modify gets its tests updated.** If you change `Footer.jsx`, update `Footer.test.jsx`. If no test file exists for a component you touched, write one alongside the change.
 - **Any new component gets a test file alongside it** — not after, alongside.
-- **Do not lower coverage.** Current baseline: 94.3% statements, 83.9% branch. PRs that reduce coverage need an explicit reason.
+- **Do not lower coverage.** Check with `npm run test:coverage` before and after your change. PRs that reduce coverage need an explicit reason.
 - **E2e tests** (`npm run test:e2e`) require a running build. Run them before merging significant layout or navigation changes — they catch regressions that unit tests miss.
 - **Known FlexSearch issue**: `useSearch.jsx` tests are excluded from vitest (`__tests__/unit/hooks/useSearch.test.jsx`) because FlexSearch causes memory issues in jsdom. Covered by e2e `search.spec.ts` instead.
 - **Test files location**:
