@@ -319,15 +319,11 @@ adding a post to a series or checking series numbering (frontmatter `series` / `
 
 ## Known Issues (Fix Before Next Significant Deploy)
 
-1. **Hero category pills are hardcoded** — `Hero.jsx` lists Deep Learning, GenAI, ML Engineering,
-   Data Science. These do not match the actual nav or content. Either derive from real categories
-   or remove the pills.
-2. **Newsletter is non-functional** — `Newsletter.jsx` shows `alert('coming soon!')`. Replace
+1. **Newsletter is non-functional** — `Newsletter.jsx` shows `alert('Newsletter signup coming soon!')`. Replace
    with a real integration (ConvertKit / Resend) or remove the section entirely.
-3. **No dark mode toggle in nav** — `ThemeProvider` is wired up but there's no UI affordance
-   to switch. Users cannot change the theme.
-4. **`'use client'` on Hero** — Hero contains no state or interactivity and is marked `'use client'`.
-   Should be a Server Component.
+
+Resolved since the original list: Hero category pills now come from `lib/categories.js`, the nav
+has a dark mode toggle (`toggleTheme` in `Navigation.jsx`), and `Hero.jsx` is a Server Component.
 
 ---
 
@@ -339,9 +335,5 @@ adding a post to a series or checking series numbering (frontmatter `series` / `
 
 ---
 
-
----
-
-**Last Updated**: 2026-03-08
 **Maintained By**: Claude Code Agent
 **Project Owner**: Akshay Bhardwaj
