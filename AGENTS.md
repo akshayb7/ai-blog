@@ -223,9 +223,9 @@ category subfolders and maps filename → slug. A post at
 3. Run `/blog-writer` to draft the post
 4. Save the MDX file to `content/posts/<category>/`
 5. Add images to `public/images/`
-6. Run `/content-repurposer` to generate LinkedIn / Twitter / Reddit variants
-7. Commit and push on a `content/<slug>` branch → open PR → merge to main
-8. **Vault sync** — write the corresponding distilled note in the Obsidian vault (see *Vault Sync* below). Do this in the same session, before `/handoff`.
+6. Commit and push on a `content/<slug>` branch → open PR → merge to main
+7. **Vault sync** — write the corresponding distilled note in the Obsidian vault (see *Vault Sync* below). Do this in the same session, before `/handoff`.
+8. **Distribute** once the post is live on the blog (see *Distribution Strategy* below): `/distribution-kit <slug>` for the LinkedIn / HN / Reddit drafts, `npm run distribute <slug>` for the Dev.to draft, `npm run substack <slug>` for the Substack paste.
 
 ### Vault Sync (Mandatory Post-Publish Step)
 
@@ -256,7 +256,9 @@ Every published post must have a corresponding distilled note in the personal Ob
 
 ### Distribution Strategy
 
-Platform-by-platform posting rules (LinkedIn, Twitter/X, Reddit, HN, RSS) live in
+The blog is the canonical home; every other platform links back to it. Cross-post commands
+(`distribute`, `substack`, `kit`, `/distribution-kit`) and platform-by-platform posting rules
+(LinkedIn, Twitter/X, Reddit, HN, Dev.to, Substack, RSS) live in
 `docs/agent-reference/distribution-strategy.md`. Read it when promoting a published post.
 
 ---
