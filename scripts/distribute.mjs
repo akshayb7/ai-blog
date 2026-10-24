@@ -7,6 +7,7 @@ import path from 'path';
 import { convertToDevto } from '../lib/crosspost/devto.js';
 import { pushDraft } from '../lib/crosspost/devto-client.js';
 import { parseEnv } from '../lib/crosspost/env.js';
+import { findPostFile } from '../lib/crosspost/posts.js';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const POSTS_DIR = path.join(ROOT, 'content/posts');
@@ -20,13 +21,6 @@ const slug = args.find((a) => !a.startsWith('--'));
 function fail(msg) {
   console.error(msg);
   process.exit(1);
-}
-
-function findPost(slug) {
-  const file = fs
-    .readdirSync(POSTS_DIR, { recursive: true })
-    .find((f) => path.basename(f) === `${slug}.mdx`);
-  return file && path.join(POSTS_DIR, file);
 }
 
 function loadApiKey() {
@@ -44,7 +38,7 @@ function writeState(state) {
 
 if (!slug) fail('Usage: npm run distribute <slug> [-- --dry-run]');
 
-const file = findPost(slug);
+const file = findPostFile(slug, POSTS_DIR);
 if (!file) fail(`No post found for slug "${slug}" under content/posts/`);
 
 const article = convertToDevto({ slug, raw: fs.readFileSync(file, 'utf8') });
