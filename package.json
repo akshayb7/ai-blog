@@ -9,6 +9,7 @@
     "lint": "eslint",
     "distribute": "node scripts/distribute.mjs",
     "kit": "node scripts/kit.mjs",
+    "substack": "node scripts/substack.mjs",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
